@@ -32,5 +32,5 @@ Where `<CHAIN>` is the name of the chain you want to use. For example, `IRIS` or
 This would let you do a cross-chain NFT transfer from IRISnet to Stargaze like this:
 
 ```bash
-$ iris tx nft-transfer transfer $IRIS_TO_STARGAZE_PORT $IRIS_TO_STARGAZE_CHANNEL <stargaze_to_address> <nft-class-id> <nft-id> $IRIS_TX_DEFAULT
+$ iris tx nft-transfer transfer $IRIS_TO_STARGAZE_PORT_1 $IRIS_TO_STARGAZE_CHANNEL_1 <stargaze_to_address> <nft-class-id> <nft-id> $IRIS_TX_DEFAULT
 ```
