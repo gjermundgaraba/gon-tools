@@ -42,35 +42,41 @@ func TransferCmd() *cobra.Command {
 				log.Fatal("No NFTs found")
 			}
 
-			classMap := make(map[string][]string)
+			classMap := make(map[string][]chains.NFT)
 			for _, nft := range nfts {
-				classMap[nft.ClassID] = append(classMap[nft.ClassID], nft.ID)
+				classMap[nft.FullPathClassID] = append(classMap[nft.FullPathClassID], nft)
 			}
 
 			var classId string
-			if len(classMap) == 1 {
-				classId = nfts[0].ClassID
-			} else {
-				var classOptions []string
-				for classId := range classMap {
-					classOptions = append(classOptions, classId)
-				}
-				if err := survey.AskOne(&survey.Select{
-					Message: "Select class",
-					Options: classOptions,
-				}, &classId, survey.WithValidator(survey.Required)); err != nil {
-					log.Fatalf("Error selecting class: %v", err)
-				}
+			var classOptions []string
+			for classId := range classMap {
+				classOptions = append(classOptions, classId)
+			}
+			if err := survey.AskOne(&survey.Select{
+				Message: "Select class",
+				Options: classOptions,
+			}, &classId, survey.WithValidator(survey.Required)); err != nil {
+				log.Fatalf("Error selecting class: %v", err)
 			}
 
 			// select nft
 			var nftId string
-			var nftOptions = classMap[classId]
+			var nftOptions []string
+			for _, nft := range classMap[classId] {
+				nftOptions = append(nftOptions, nft.ID)
+			}
 			if err := survey.AskOne(&survey.Select{
 				Message: "Select NFT",
 				Options: nftOptions,
 			}, &nftId, survey.WithValidator(survey.Required)); err != nil {
 				log.Fatalf("Error selecting NFT: %v", err)
+			}
+			var selectedNFT chains.NFT
+			for _, nft := range classMap[classId] {
+				if nft.ID == nftId {
+					selectedNFT = nft
+					break
+				}
 			}
 
 			var destinationAddress string
@@ -84,20 +90,23 @@ func TransferCmd() *cobra.Command {
 			/*sourceChain.TransferNFT(cmd.Context(), clientCtx, chains.TransferNFTFields{
 				NFT: chains.NFT{
 					ID:      nftId,
-					ClassID: classId,
+					FullPathClassID: classId,
 				},
 				DestinationChain: destinationChain,
 				SenderAddress:    fromAddress,
 				ReceiverAddress:  destinationAddress,
 			})*/
 
-			sourceNFTConnection := sourceChain.GetSourceNFTConnection(destinationChain)
+			sourceNFTConnection := selectedNFT.LastIBCConnection
+			if sourceNFTConnection.Port == "" {
+				sourceNFTConnection = sourceChain.GetSourceNFTConnection(destinationChain)
+			}
 			timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, sourceNFTConnection.Port, sourceNFTConnection.Channel)
 
 			msg := &nfttransfertypes.MsgTransfer{
 				SourcePort:       sourceNFTConnection.Port,
 				SourceChannel:    sourceNFTConnection.Channel,
-				ClassId:          classId,
+				ClassId:          selectedNFT.ClassID, // In the case of IBC, it will be the ibc/{hash} format
 				TokenIds:         []string{nftId},
 				Sender:           fromAddress,
 				Receiver:         destinationAddress,

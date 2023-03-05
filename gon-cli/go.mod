@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
-	github.com/OmniFlix/onft v0.3.0
+	github.com/OmniFlix/onft v0.4.0-gon-rc11
 	github.com/bianjieai/nft-transfer v1.1.1-beta
 	github.com/cosmos/cosmos-sdk v0.46.10
 	github.com/cosmos/ibc-go/v5 v5.1.0

@@ -23,11 +23,16 @@ func (c OmnfiFlixChain) ListNFTs(ctx context.Context, clientCtx client.Context, 
 	}
 
 	var nfts []NFT
-	for _, collection := range resp.Collections {
-		for _, nft := range collection.Onfts {
+	for _, collection := range resp.Owner.IDCollections {
+		baseClassID, fullPathClassID, lastIBCConnection := findClassIBCInfo(ctx, clientCtx, collection.DenomId)
+
+		for _, nft := range collection.OnftIds {
 			nfts = append(nfts, NFT{
-				ID:      nft.Id,
-				ClassID: collection.GetDenom().Id,
+				ID:                nft,
+				ClassID:           collection.DenomId,
+				BaseClassID:       baseClassID,
+				FullPathClassID:   fullPathClassID,
+				LastIBCConnection: lastIBCConnection,
 			})
 		}
 	}

@@ -24,10 +24,15 @@ func (c IrisChain) ListNFTs(ctx context.Context, clientCtx client.Context, query
 
 	var nfts []NFT
 	for _, collection := range resp.Owner.IDCollections {
+		baseClassID, fullPathClassID, lastIBCConnection := findClassIBCInfo(ctx, clientCtx, collection.DenomId)
+
 		for _, nft := range collection.TokenIds {
 			nfts = append(nfts, NFT{
-				ID:      nft,
-				ClassID: collection.DenomId,
+				ID:                nft,
+				ClassID:           collection.DenomId,
+				BaseClassID:       baseClassID,
+				FullPathClassID:   fullPathClassID,
+				LastIBCConnection: lastIBCConnection,
 			})
 		}
 	}

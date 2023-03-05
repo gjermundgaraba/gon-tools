@@ -40,8 +40,11 @@ type TransferNFTFields struct {
 }
 
 type NFT struct {
-	ID      string
-	ClassID string
+	ID                string
+	ClassID           string
+	BaseClassID       string
+	FullPathClassID   string
+	LastIBCConnection NFTConnection
 }
 
 type ChainID string
