@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	omniflixnfttypes "github.com/OmniFlix/onft/types"
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
@@ -15,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ibctypes "github.com/cosmos/ibc-go/v5/modules/core/types"
+	irisnfttypes "github.com/irisnet/irismod/modules/nft/types"
 	"github.com/spf13/cobra"
 	tmcfg "github.com/tendermint/tendermint/config"
 	"os"
@@ -36,10 +38,6 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 		Use:   "gon-cli",
 		Short: "Game of NFTs - made simple!",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-			/*if err := cmd.PersistentFlags().Set(flags.FlagHome, appHomeDir); err != nil {
-				panic(err)
-			}*/
-
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
@@ -59,7 +57,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 			}
 
 			customAppTemplate, customAppConfig := initAppConfig()
-			customTMConfig := initTendermintConfig()
+			customTMConfig := tmcfg.DefaultConfig()
 
 			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
 		},
@@ -68,6 +66,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 	rootCmd.AddCommand(
 		keys.Commands(appHomeDir),
 		TransferCmd(),
+		CreateClassCmd(),
+		CreateQueryCmd(),
 	)
 
 	//rootCmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
@@ -103,18 +103,6 @@ func initAppConfig() (string, interface{}) {
 	return customAppTemplate, customAppConfig
 }
 
-// initTendermintConfig helps to override default Tendermint Config values.
-// return tmcfg.DefaultConfig if no custom configuration is required for the application.
-func initTendermintConfig() *tmcfg.Config {
-	cfg := tmcfg.DefaultConfig()
-
-	// these values put a higher strain on node memory
-	// cfg.P2P.MaxNumInboundPeers = 100
-	// cfg.P2P.MaxNumOutboundPeers = 40
-
-	return cfg
-}
-
 func makeEncodingConfig() EncodingConfig {
 	amino := codec.NewLegacyAmino()
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
@@ -129,6 +117,12 @@ func makeEncodingConfig() EncodingConfig {
 
 	authtypes.RegisterInterfaces(interfaceRegistry)
 	authtypes.RegisterLegacyAminoCodec(amino)
+
+	irisnfttypes.RegisterInterfaces(interfaceRegistry)
+	irisnfttypes.RegisterLegacyAminoCodec(amino)
+
+	omniflixnfttypes.RegisterInterfaces(interfaceRegistry)
+	omniflixnfttypes.RegisterLegacyAminoCodec(amino)
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,

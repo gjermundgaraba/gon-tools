@@ -14,6 +14,7 @@ import (
 
 type Chain interface {
 	Name() string
+	Label() string
 	ChainID() ChainID
 	RPC() string
 	GRPC() string
@@ -23,8 +24,10 @@ type Chain interface {
 	ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string
 	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
 	GetSourceNFTConnection(destinationChain Chain) NFTConnection
-	ListNFTs(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFT
-	TransferNFT(ctx context.Context, clientCtx client.Context, fields TransferNFTFields)
+	ListNFTClasses(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
+
+	CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
+	CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg
 }
 
 type ListNFTsQuery struct {
@@ -39,12 +42,25 @@ type TransferNFTFields struct {
 	ReceiverAddress  string
 }
 
-type NFT struct {
-	ID                string
+type NFTClass struct {
 	ClassID           string
 	BaseClassID       string
 	FullPathClassID   string
+	NFTs              []NFT
 	LastIBCConnection NFTConnection
+}
+
+func (n NFTClass) Label() string {
+	return n.FullPathClassID
+}
+
+type NFT struct {
+	ID      string
+	ClassID string
+}
+
+func (n NFT) Label() string {
+	return n.ID
 }
 
 type ChainID string
@@ -68,6 +84,10 @@ type ChainData struct {
 }
 
 func (c ChainData) Name() string {
+	return c.name
+}
+
+func (c ChainData) Label() string {
 	return c.name
 }
 

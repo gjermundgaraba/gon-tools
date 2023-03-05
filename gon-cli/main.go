@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/cosmos/cosmos-sdk/server"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/gjermundgaraba/goncli/chains/cmd"
+	"github.com/gjermundgaraba/goncli/cmd"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
