@@ -80,7 +80,7 @@ func chooseChain(questionPhrasing string, filterOut ...chains.Chain) chains.Chai
 		chainOptions = append(chainOptions, chain)
 	}
 
-	return selectOne(questionPhrasing, chainOptions)
+	return chooseOne(questionPhrasing, chainOptions)
 }
 
 func chooseWallet(cmd *cobra.Command) string {
@@ -98,12 +98,16 @@ func chooseWallet(cmd *cobra.Command) string {
 		panic(err)
 	}
 
+	if len(records) == 0 {
+		log.Fatal("No wallets found, please add one with 'goncli keys add <name>' (--recover to recover from mnemonic)")
+	}
+
 	var walletNames []OptionString
 	for _, o := range records {
 		walletNames = append(walletNames, OptionString(o.Name))
 	}
 
-	return string(selectOne("Choose a wallet", walletNames))
+	return string(chooseOne("Choose a wallet", walletNames))
 }
 
 type Option interface {
@@ -116,7 +120,16 @@ func (o OptionString) Label() string {
 	return string(o)
 }
 
-func selectOne[T Option](questionPhrasing string, options []T) T {
+type OptionWrapper[T any] struct {
+	WrappedValue T
+	LabelFunc    func(T) string
+}
+
+func (o OptionWrapper[T]) Label() string {
+	return o.LabelFunc(o.WrappedValue)
+}
+
+func chooseOne[T Option](questionPhrasing string, options []T) T {
 	var selectedIndex int
 	var surveyOptions []string
 	for _, o := range options {

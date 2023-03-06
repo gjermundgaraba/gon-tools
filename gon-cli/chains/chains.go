@@ -22,13 +22,15 @@ type Chain interface {
 	Denom() string
 	ConvertAddressToChainsPrefix(address string) string
 	ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string
+
+	GetConnectionsTo(chain Chain) []NFTConnection
 	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
-	GetSourceNFTConnection(destinationChain Chain) NFTConnection
 
 	CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg
-	CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
+	CreateTransferNFTMsg(channel NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
+	CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg
 
-	ListNFTClasses(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
+	ListNFTClassesThatHasNFTs(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
 }
 
 type ListNFTsQuery struct {
@@ -36,19 +38,12 @@ type ListNFTsQuery struct {
 	Owner          string
 }
 
-type TransferNFTFields struct {
-	NFT              NFT
-	DestinationChain Chain
-	SenderAddress    string
-	ReceiverAddress  string
-}
-
 type NFTClass struct {
-	ClassID           string
-	BaseClassID       string
-	FullPathClassID   string
-	NFTs              []NFT
-	LastIBCConnection NFTConnection
+	ClassID         string
+	BaseClassID     string
+	FullPathClassID string
+	NFTs            []NFT
+	LastIBCChannel  NFTChannel
 }
 
 func (n NFTClass) Label() string {
@@ -66,22 +61,13 @@ func (n NFT) Label() string {
 
 type ChainID string
 
-type NFTType int
-
-type NFTConnection struct {
-	Port    string
-	Channel string
-}
-
 type ChainData struct {
-	name           string
-	chainID        ChainID
-	bech32Prefix   string
-	denom          string
-	rpc            string
-	grpc           string
-	nftType        NFTType
-	nftConnections map[ChainID]NFTConnection
+	name         string
+	chainID      ChainID
+	bech32Prefix string
+	denom        string
+	rpc          string
+	grpc         string
 }
 
 func (c ChainData) Name() string {
@@ -169,159 +155,10 @@ func (c ChainData) GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel 
 	return
 }
 
-func (c ChainData) GetSourceNFTConnection(destinationChain Chain) NFTConnection {
-	return c.nftConnections[destinationChain.ChainID()]
-}
-
-const (
-	NFTTypeCosmosSDK NFTType = iota
-	NFTTypeWasm
-)
-
 var Chains = []Chain{
-	IrisChain{
-		ChainData{
-			name:         "IRISNet GoN Testnet",
-			chainID:      "gon-irishub-1",
-			bech32Prefix: "iaa",
-			denom:        "uiris",
-			rpc:          "http://34.80.93.133:26657",
-			grpc:         "http://34.80.93.133:9090",
-			nftType:      NFTTypeCosmosSDK,
-			nftConnections: map[ChainID]NFTConnection{
-				"elgafar-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-22",
-				},
-				"uni-6": {
-					Port:    "nft-transfer",
-					Channel: "channel-24",
-				},
-				"uptick_7000-2": {
-					Port:    "nft-transfer",
-					Channel: "channel-17",
-				},
-				"gon-flixnet-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-0",
-				},
-			},
-		},
-	},
-	StargazeChain{
-		ChainData{
-			name:         "Stargaze GoN Testnet",
-			chainID:      "elgafar-1",
-			bech32Prefix: "stars",
-			denom:        "ustars",
-			rpc:          "https://rpc.elgafar-1.stargaze-apis.com:443",
-			grpc:         "http://grpc-1.elgafar-1.stargaze-apis.com:26660",
-			nftType:      NFTTypeWasm,
-			nftConnections: map[ChainID]NFTConnection{
-				"gon-irishub-1": {
-					Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
-					Channel: "channel-207",
-				},
-				"uni-6": {
-					Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
-					Channel: "channel-211",
-				},
-				"uptick_7000-2": {
-					Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
-					Channel: "channel-203",
-				},
-				"gon-flixnet-1": {
-					Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
-					Channel: "channel-209",
-				},
-			},
-		},
-	},
-	JunoChain{
-		ChainData{
-			name:         "Juno GoN Testnet",
-			chainID:      "uni-6",
-			bech32Prefix: "juno",
-			denom:        "ujunox",
-			rpc:          "https://rpc.uni.junonetwork.io:443",
-			grpc:         "http://juno-testnet-grpc.polkachu.com:12690",
-			nftType:      NFTTypeWasm,
-			nftConnections: map[ChainID]NFTConnection{
-				"gon-irishub-1": {
-					Port:    "wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a",
-					Channel: "channel-89",
-				},
-				"elgafar-1": {
-					Port:    "wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a",
-					Channel: "channel-93",
-				},
-				"uptick_7000-2": {
-					Port:    "wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a",
-					Channel: "channel-86",
-				},
-				"gon-flixnet-1": {
-					Port:    "wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a",
-					Channel: "channel-91",
-				},
-			},
-		},
-	},
-	UptickChain{
-		ChainData{
-			name:         "Uptick GoN Testnet",
-			chainID:      "uptick_7000-2",
-			bech32Prefix: "uptick",
-			denom:        "auptick",
-			rpc:          "http://52.220.252.160:26657",
-			grpc:         "http://52.220.252.160:9090",
-			nftType:      NFTTypeCosmosSDK,
-			nftConnections: map[ChainID]NFTConnection{
-				"gon-irishub-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-3",
-				},
-				"elgafar-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-6",
-				},
-				"uni-6": {
-					Port:    "nft-transfer",
-					Channel: "channel-7",
-				},
-				"gon-flixnet-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-5",
-				},
-			},
-		},
-	},
-	OmnfiFlixChain{
-		ChainData{
-			name:         "OmniFlix GoN Testnet",
-			chainID:      "gon-flixnet-1",
-			bech32Prefix: "omniflix",
-			denom:        "uflix",
-			rpc:          "http://65.21.93.56:26657",
-			grpc:         "http://65.21.93.56:9090",
-			nftType:      NFTTypeCosmosSDK,
-			nftConnections: map[ChainID]NFTConnection{
-				"gon-irishub-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-24",
-				},
-				"elgafar-1": {
-					Port:    "nft-transfer",
-					Channel: "channel-44",
-				},
-				"uni-6": {
-					Port:    "nft-transfer",
-					Channel: "channel-46",
-				},
-				"uptick_7000-2": {
-					Port:    "nft-transfer",
-					Channel: "channel-41",
-				},
-			},
-		},
-	},
+	IRISChain,
+	StargazeChain,
+	JunoChain,
+	UptickChain,
+	OmniFlixChain,
 }

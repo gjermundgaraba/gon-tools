@@ -9,11 +9,22 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 )
 
-type OmnfiFlixChain struct {
+type omnfiFlixChain struct {
 	ChainData
 }
 
-func (c OmnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, _, _ bool, description, uri, uriHash, data string) sdk.Msg {
+var OmniFlixChain = omnfiFlixChain{
+	ChainData{
+		name:         "OmniFlix GoN Testnet",
+		chainID:      "gon-flixnet-1",
+		bech32Prefix: "omniflix",
+		denom:        "uflix",
+		rpc:          "http://65.21.93.56:26657",
+		grpc:         "http://65.21.93.56:9090",
+	},
+}
+
+func (c omnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, _, _ bool, description, uri, uriHash, data string) sdk.Msg {
 	return &omniflixnfttypes.MsgCreateDenom{
 		Id:          denomID,
 		Name:        denomName,
@@ -27,7 +38,7 @@ func (c OmnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, se
 	}
 }
 
-func (c OmnfiFlixChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c omnfiFlixChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	return &nfttransfertypes.MsgTransfer{
 		SourcePort:       connection.Port,
 		SourceChannel:    connection.Channel,
@@ -41,7 +52,23 @@ func (c OmnfiFlixChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, 
 	}
 }
 
-func (c OmnfiFlixChain) ListNFTClasses(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c omnfiFlixChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {
+	panic("implement me")
+	/*return &omniflixnfttypes.MsgMintONFT{
+		Id:           tokenID,
+		DenomId:      classID,
+		Metadata:     omniflixnfttypes.Metadata{},
+		Data:         tokenData,
+		Transferable: true,
+		Extensible:   false,
+		Nsfw:         false,
+		RoyaltyShare: sdk.Dec{},
+		Sender:       "",
+		Recipient:    "",
+	}*/
+}
+
+func (c omnfiFlixChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
 	nftQueryClient := omniflixnfttypes.NewQueryClient(clientCtx)
 
 	request := &omniflixnfttypes.QueryOwnerONFTsRequest{
@@ -65,11 +92,11 @@ func (c OmnfiFlixChain) ListNFTClasses(ctx context.Context, clientCtx client.Con
 
 		baseClassID, fullPathClassID, lastIBCConnection := findClassIBCInfo(ctx, clientCtx, collection.DenomId)
 		classes = append(classes, NFTClass{
-			ClassID:           collection.DenomId,
-			BaseClassID:       baseClassID,
-			FullPathClassID:   fullPathClassID,
-			NFTs:              nfts,
-			LastIBCConnection: lastIBCConnection,
+			ClassID:         collection.DenomId,
+			BaseClassID:     baseClassID,
+			FullPathClassID: fullPathClassID,
+			NFTs:            nfts,
+			LastIBCChannel:  lastIBCConnection,
 		})
 	}
 

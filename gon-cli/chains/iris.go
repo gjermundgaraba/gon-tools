@@ -9,15 +9,26 @@ import (
 	irisnfttypes "github.com/irisnet/irismod/modules/nft/types"
 )
 
-type IrisChain struct {
+type irisChain struct {
 	ChainData
 }
 
-func (c IrisChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
+var IRISChain = irisChain{
+	ChainData{
+		name:         "IRISNet GoN Testnet",
+		chainID:      "gon-irishub-1",
+		bech32Prefix: "iaa",
+		denom:        "uiris",
+		rpc:          "http://34.80.93.133:26657",
+		grpc:         "http://34.80.93.133:9090",
+	},
+}
+
+func (c irisChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
 	return irisnfttypes.NewMsgIssueDenom(denomID, denomName, schema, sender, symbol, mintRestricted, updateRestricted, description, uri, uriHash, data)
 }
 
-func (c IrisChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c irisChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	return &nfttransfertypes.MsgTransfer{
 		SourcePort:       connection.Port,
 		SourceChannel:    connection.Channel,
@@ -31,7 +42,11 @@ func (c IrisChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromA
 	}
 }
 
-func (c IrisChain) ListNFTClasses(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c irisChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {
+	return irisnfttypes.NewMsgMintNFT(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress, minterAddress)
+}
+
+func (c irisChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
 	nftQueryClient := irisnfttypes.NewQueryClient(clientCtx)
 
 	request := &irisnfttypes.QueryNFTsOfOwnerRequest{
@@ -55,11 +70,11 @@ func (c IrisChain) ListNFTClasses(ctx context.Context, clientCtx client.Context,
 
 		baseClassID, fullPathClassID, lastIBCConnection := findClassIBCInfo(ctx, clientCtx, collection.DenomId)
 		classes = append(classes, NFTClass{
-			ClassID:           collection.DenomId,
-			BaseClassID:       baseClassID,
-			FullPathClassID:   fullPathClassID,
-			NFTs:              nfts,
-			LastIBCConnection: lastIBCConnection,
+			ClassID:         collection.DenomId,
+			BaseClassID:     baseClassID,
+			FullPathClassID: fullPathClassID,
+			NFTs:            nfts,
+			LastIBCChannel:  lastIBCConnection,
 		})
 	}
 

@@ -7,19 +7,33 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 )
 
-type JunoChain struct {
+type junoChain struct {
 	ChainData
 }
 
-func (c JunoChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
+var JunoChain = junoChain{
+	ChainData{
+		name:         "Juno GoN Testnet",
+		chainID:      "uni-6",
+		bech32Prefix: "juno",
+		denom:        "ujunox",
+		rpc:          "https://rpc.uni.junonetwork.io:443",
+		grpc:         "http://juno-testnet-grpc.polkachu.com:12690",
+	},
+}
+
+func (c junoChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
 	panic("implement me")
 }
 
-func (c JunoChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c junoChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	panic("implement me")
 }
 
-func (c JunoChain) ListNFTClasses(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c junoChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {
 	panic("implement me")
+}
 
+func (c junoChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+	panic("implement me")
 }

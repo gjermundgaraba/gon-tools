@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	omniflixnfttypes "github.com/OmniFlix/onft/types"
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -22,6 +23,20 @@ import (
 	"os"
 )
 
+const (
+	createNFTClassOption  OptionString = "Create NFT Class"
+	createNFTClassCommand              = "create-class"
+
+	mintNFTOption  OptionString = "Mint NFT"
+	mintNFTCommand              = "mint"
+
+	queryNFTClassesOption  OptionString = "Query NFT Classes for which you own NFTs"
+	queryNFTClassesCommand              = "query-classes"
+
+	transferNFTOption  OptionString = "Transfer NFT (Over IBC)"
+	transferNFTCommand              = "transfer"
+)
+
 func NewRootCmd(appHomeDir string) *cobra.Command {
 	encodingConfig := makeEncodingConfig()
 	initClientCtx := client.Context{}.
@@ -35,8 +50,16 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 		WithViper("")
 
 	rootCmd := &cobra.Command{
-		Use:   "gon-cli",
+		Use:   "gon-cli [optional-command]",
 		Short: "Game of NFTs - made simple!",
+		Long: fmt.Sprintf(`Game of NFTs - made simple!
+[optional-command] can be one of the following:
+- %s (creates a new NFT class)
+- %s (mints a new NFT)
+- %s (queries your NFT classes)
+- %s (transfers an NFT over IBC)
+`, createNFTClassCommand, mintNFTCommand, queryNFTClassesCommand, transferNFTCommand),
+		Args: cobra.ArbitraryArgs,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -61,16 +84,55 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 
 			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
 		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			wallet := chooseWallet(cmd)
+			if err := cmd.Flags().Set(flags.FlagFrom, wallet); err != nil {
+				panic(err)
+			}
+
+			topLevelOptions := []OptionString{
+				createNFTClassOption,
+				mintNFTOption,
+				transferNFTOption,
+				queryNFTClassesOption,
+			}
+
+			var topLevelChoice OptionString
+			if len(args) > 0 && args[0] != "" {
+				switch args[0] {
+				case createNFTClassCommand:
+					topLevelChoice = createNFTClassOption
+				case mintNFTCommand:
+					topLevelChoice = mintNFTOption
+				case transferNFTCommand:
+					topLevelChoice = transferNFTOption
+				case queryNFTClassesCommand:
+					topLevelChoice = queryNFTClassesOption
+				default:
+					panic("invalid command")
+				}
+			} else {
+				topLevelChoice = chooseOne("What would you like to do?", topLevelOptions)
+			}
+
+			switch topLevelChoice {
+			case createNFTClassOption:
+				return createNFTClass(cmd)
+			case mintNFTOption:
+				return mintNFT(cmd)
+			case transferNFTOption:
+				return transferNFT(cmd)
+			case queryNFTClassesOption:
+				return queryNFTClasses(cmd)
+			}
+			return nil
+		},
 	}
 
 	rootCmd.AddCommand(
 		keys.Commands(appHomeDir),
-		TransferCmd(),
-		CreateClassCmd(),
-		CreateQueryCmd(),
 	)
 
-	//rootCmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 	flags.AddTxFlagsToCmd(rootCmd)
 
 	return rootCmd
