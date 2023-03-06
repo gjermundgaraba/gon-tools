@@ -24,10 +24,11 @@ type Chain interface {
 	ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string
 	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
 	GetSourceNFTConnection(destinationChain Chain) NFTConnection
-	ListNFTClasses(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
 
-	CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
 	CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg
+	CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
+
+	ListNFTClasses(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
 }
 
 type ListNFTsQuery struct {

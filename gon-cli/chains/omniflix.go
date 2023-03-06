@@ -13,6 +13,34 @@ type OmnfiFlixChain struct {
 	ChainData
 }
 
+func (c OmnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, _, _ bool, description, uri, uriHash, data string) sdk.Msg {
+	return &omniflixnfttypes.MsgCreateDenom{
+		Id:          denomID,
+		Name:        denomName,
+		Schema:      schema,
+		Sender:      sender,
+		Symbol:      symbol,
+		Description: description,
+		Uri:         uri,
+		UriHash:     uriHash,
+		Data:        data,
+	}
+}
+
+func (c OmnfiFlixChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+	return &nfttransfertypes.MsgTransfer{
+		SourcePort:       connection.Port,
+		SourceChannel:    connection.Channel,
+		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
+		TokenIds:         []string{nft.ID},
+		Sender:           fromAddress,
+		Receiver:         toAddress,
+		TimeoutHeight:    timeoutHeight,
+		TimeoutTimestamp: timeoutTimestamp,
+		Memo:             "Sent using the Game of NFTs CLI by @gjermundgaraba",
+	}
+}
+
 func (c OmnfiFlixChain) ListNFTClasses(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
 	nftQueryClient := omniflixnfttypes.NewQueryClient(clientCtx)
 
@@ -46,32 +74,4 @@ func (c OmnfiFlixChain) ListNFTClasses(ctx context.Context, clientCtx client.Con
 	}
 
 	return classes
-}
-
-func (c OmnfiFlixChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	return &nfttransfertypes.MsgTransfer{
-		SourcePort:       connection.Port,
-		SourceChannel:    connection.Channel,
-		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
-		TokenIds:         []string{nft.ID},
-		Sender:           fromAddress,
-		Receiver:         toAddress,
-		TimeoutHeight:    timeoutHeight,
-		TimeoutTimestamp: timeoutTimestamp,
-		Memo:             "Sent using the Game of NFTs CLI by @gjermundgaraba",
-	}
-}
-
-func (c OmnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, _, _ bool, description, uri, uriHash, data string) sdk.Msg {
-	return &omniflixnfttypes.MsgCreateDenom{
-		Id:          denomID,
-		Name:        denomName,
-		Schema:      schema,
-		Sender:      sender,
-		Symbol:      symbol,
-		Description: description,
-		Uri:         uri,
-		UriHash:     uriHash,
-		Data:        data,
-	}
 }

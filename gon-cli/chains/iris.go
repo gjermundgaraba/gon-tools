@@ -13,6 +13,24 @@ type IrisChain struct {
 	ChainData
 }
 
+func (c IrisChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
+	return irisnfttypes.NewMsgIssueDenom(denomID, denomName, schema, sender, symbol, mintRestricted, updateRestricted, description, uri, uriHash, data)
+}
+
+func (c IrisChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+	return &nfttransfertypes.MsgTransfer{
+		SourcePort:       connection.Port,
+		SourceChannel:    connection.Channel,
+		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
+		TokenIds:         []string{nft.ID},
+		Sender:           fromAddress,
+		Receiver:         toAddress,
+		TimeoutHeight:    timeoutHeight,
+		TimeoutTimestamp: timeoutTimestamp,
+		Memo:             "Sent using the Game of NFTs CLI by @gjermundgaraba",
+	}
+}
+
 func (c IrisChain) ListNFTClasses(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
 	nftQueryClient := irisnfttypes.NewQueryClient(clientCtx)
 
@@ -46,22 +64,4 @@ func (c IrisChain) ListNFTClasses(ctx context.Context, clientCtx client.Context,
 	}
 
 	return classes
-}
-
-func (c IrisChain) CreateTransferNFTMsg(connection NFTConnection, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	return &nfttransfertypes.MsgTransfer{
-		SourcePort:       connection.Port,
-		SourceChannel:    connection.Channel,
-		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
-		TokenIds:         []string{nft.ID},
-		Sender:           fromAddress,
-		Receiver:         toAddress,
-		TimeoutHeight:    timeoutHeight,
-		TimeoutTimestamp: timeoutTimestamp,
-		Memo:             "Sent using the Game of NFTs CLI by @gjermundgaraba",
-	}
-}
-
-func (c IrisChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg {
-	return irisnfttypes.NewMsgIssueDenom(denomID, denomName, schema, sender, symbol, mintRestricted, updateRestricted, description, uri, uriHash, data)
 }
