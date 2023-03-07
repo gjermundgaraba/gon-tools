@@ -1,4 +1,4 @@
-module github.com/gjermundgaraba/goncli
+module github.com/gjermundgaraba/gon
 
 go 1.19
 
@@ -151,4 +151,4 @@ replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alp
 
 replace github.com/tendermint/tendermint => github.com/informalsystems/tendermint v0.34.26
 
-replace github.com/CosmWasm/wasmd => ../../../../../tmp/wasmd
+replace github.com/CosmWasm/wasmd => github.com/gjermundgaraba/wasmd v0.0.0-20230307121039-b9c2de8aa0df

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/gjermundgaraba/goncli/chains"
+	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
 	"log"
 	"strings"

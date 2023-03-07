@@ -5,7 +5,7 @@ import (
 	"fmt"
 	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/gjermundgaraba/goncli/chains"
+	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/json"
 	"log"
