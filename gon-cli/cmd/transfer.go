@@ -23,9 +23,7 @@ func transferNFT(cmd *cobra.Command) error {
 	destinationChain := chooseChain("Select destination chain", sourceChain)
 	_ = destinationChain
 
-	classes := sourceChain.ListNFTClassesThatHasNFTs(cmd.Context(), clientCtx, chains.ListNFTsQuery{
-		Owner: fromAddress,
-	})
+	classes := sourceChain.ListNFTClassesThatHasNFTs(cmd.Context(), clientCtx, fromAddress)
 	if len(classes) == 0 {
 		log.Fatal("No NFT classes found")
 	}
@@ -69,8 +67,10 @@ func transferNFT(cmd *cobra.Command) error {
 		return err
 	}
 
+	fmt.Println()
 	fmt.Println("Initial IBC transfer sent. It might take a moment before it is visible on the destination chain.")
-	fmt.Println("The destination ibc trace will be:")
+	fmt.Println()
+	fmt.Println("The destination ibc trace (full Class ID on destination chain) will be:")
 	fmt.Printf("%s/%s/%s\n", chosenConnection.ChannelB.Port, chosenConnection.ChannelB.Channel, selectedNFT.ClassID)
 
 	return nil

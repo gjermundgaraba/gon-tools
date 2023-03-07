@@ -56,9 +56,7 @@ func queryNFTs(cmd *cobra.Command) error {
 func getUsersNfts(ctx context.Context, clientCtx client.Context, chain chains.Chain, address string) chains.NFTClass {
 	switch chain.NFTImplementation() {
 	case chains.CosmosSDK:
-		classes := chain.ListNFTClassesThatHasNFTs(ctx, clientCtx, chains.ListNFTsQuery{
-			Owner: address,
-		})
+		classes := chain.ListNFTClassesThatHasNFTs(ctx, clientCtx, address)
 		if len(classes) == 0 {
 			log.Fatal("No NFT classes found")
 		}

@@ -69,12 +69,11 @@ func (c omnfiFlixChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, 
 	}*/
 }
 
-func (c omnfiFlixChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c omnfiFlixChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, owner string) []NFTClass {
 	nftQueryClient := omniflixnfttypes.NewQueryClient(clientCtx)
 
 	request := &omniflixnfttypes.QueryOwnerONFTsRequest{
-		DenomId: query.ClassReference,
-		Owner:   query.Owner,
+		Owner: owner,
 	}
 	resp, err := nftQueryClient.OwnerONFTs(ctx, request)
 	if err != nil {

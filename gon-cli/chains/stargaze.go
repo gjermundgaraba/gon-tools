@@ -35,6 +35,6 @@ func (c stargazeChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, t
 	panic("implement me")
 }
 
-func (c stargazeChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c stargazeChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, owner string) []NFTClass {
 	panic("implement me")
 }

@@ -38,12 +38,7 @@ type Chain interface {
 	CreateTransferNFTMsg(channel NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
 	CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg
 
-	ListNFTClassesThatHasNFTs(ctx context.Context, clientContext client.Context, query ListNFTsQuery) []NFTClass
-}
-
-type ListNFTsQuery struct {
-	ClassReference string
-	Owner          string
+	ListNFTClassesThatHasNFTs(ctx context.Context, clientContext client.Context, owner string) []NFTClass
 }
 
 type NFTClass struct {

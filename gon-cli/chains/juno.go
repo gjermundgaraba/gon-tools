@@ -35,6 +35,6 @@ func (c junoChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, token
 	panic("implement me")
 }
 
-func (c junoChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c junoChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, owner string) []NFTClass {
 	panic("implement me")
 }

@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	uptickcollectiontypes "github.com/UptickNetwork/uptick/x/collection/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
@@ -35,6 +36,36 @@ func (c uptickChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tok
 	panic("implement me")
 }
 
-func (c uptickChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
-	panic("implement me")
+func (c uptickChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, owner string) []NFTClass {
+	nftQueryClient := uptickcollectiontypes.NewQueryClient(clientCtx)
+
+	request := &uptickcollectiontypes.QueryNFTsOfOwnerRequest{
+		Owner: owner,
+	}
+	resp, err := nftQueryClient.NFTsOfOwner(ctx, request)
+	if err != nil {
+		panic(err)
+	}
+
+	var classes []NFTClass
+	for _, collection := range resp.Owner.IDCollections {
+		var nfts []NFT
+		for _, nft := range collection.TokenIds {
+			nfts = append(nfts, NFT{
+				ID:      nft,
+				ClassID: collection.DenomId,
+			})
+		}
+
+		baseClassID, fullPathClassID, lastIBCConnection := findClassIBCInfo(ctx, clientCtx, collection.DenomId)
+		classes = append(classes, NFTClass{
+			ClassID:         collection.DenomId,
+			BaseClassID:     baseClassID,
+			FullPathClassID: fullPathClassID,
+			NFTs:            nfts,
+			LastIBCChannel:  lastIBCConnection,
+		})
+	}
+
+	return classes
 }

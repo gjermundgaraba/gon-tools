@@ -47,12 +47,11 @@ func (c irisChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, token
 	return irisnfttypes.NewMsgMintNFT(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress, minterAddress)
 }
 
-func (c irisChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, query ListNFTsQuery) []NFTClass {
+func (c irisChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx client.Context, owner string) []NFTClass {
 	nftQueryClient := irisnfttypes.NewQueryClient(clientCtx)
 
 	request := &irisnfttypes.QueryNFTsOfOwnerRequest{
-		DenomId: query.ClassReference,
-		Owner:   query.Owner,
+		Owner: owner,
 	}
 	resp, err := nftQueryClient.NFTsOfOwner(ctx, request)
 	if err != nil {
