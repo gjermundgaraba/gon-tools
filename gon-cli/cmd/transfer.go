@@ -75,7 +75,7 @@ func transferNFT(cmd *cobra.Command) error {
 		fmt.Println("(This is a rewind transaction)")
 		expectedDestinationClass = strings.TrimPrefix(selectedClass.FullPathClassID, fmt.Sprintf("%s/%s/", chosenConnection.ChannelA.Port, chosenConnection.ChannelA.Channel))
 	} else {
-		expectedDestinationClass = fmt.Sprintf("%s/%s/%s", chosenConnection.ChannelB.Port, chosenConnection.ChannelB.Channel, selectedClass.ClassID)
+		expectedDestinationClass = fmt.Sprintf("%s/%s/%s", chosenConnection.ChannelB.Port, chosenConnection.ChannelB.Channel, selectedClass.FullPathClassID)
 	}
 	fmt.Println(expectedDestinationClass)
 
