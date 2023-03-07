@@ -3,7 +3,6 @@ package chains
 import (
 	"context"
 	omniflixnfttypes "github.com/OmniFlix/onft/types"
-	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
@@ -40,17 +39,7 @@ func (c omnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, se
 }
 
 func (c omnfiFlixChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	return &nfttransfertypes.MsgTransfer{
-		SourcePort:       connection.Port,
-		SourceChannel:    connection.Channel,
-		ClassId:          class.ClassID, // In the case of IBC, it will be the ibc/{hash} format
-		TokenIds:         []string{nft.ID},
-		Sender:           fromAddress,
-		Receiver:         toAddress,
-		TimeoutHeight:    timeoutHeight,
-		TimeoutTimestamp: timeoutTimestamp,
-		Memo:             "Sent using the Game of NFTs CLI by @gjermundgaraba",
-	}
+	return createTransferNFTMsg(connection, class, nft, fromAddress, toAddress, timeoutHeight, timeoutTimestamp)
 }
 
 func (c omnfiFlixChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {

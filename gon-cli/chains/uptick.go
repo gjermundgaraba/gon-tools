@@ -29,7 +29,7 @@ func (c uptickChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sende
 }
 
 func (c uptickChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	panic("implement me")
+	return createTransferNFTMsg(connection, class, nft, fromAddress, toAddress, timeoutHeight, timeoutTimestamp)
 }
 
 func (c uptickChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {

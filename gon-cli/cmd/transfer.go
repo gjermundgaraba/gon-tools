@@ -11,7 +11,7 @@ import (
 )
 
 func transferNFT(cmd *cobra.Command) error {
-	sourceChain := chooseChain("Select source chain")
+	sourceChain := chooseChain("Select source chain", chains.UptickChain)
 	setAddressPrefixes(sourceChain.Bech32Prefix())
 
 	clientCtx := getClientContext(cmd, sourceChain)
@@ -21,7 +21,7 @@ func transferNFT(cmd *cobra.Command) error {
 	}
 	fromAddress := sourceChain.ConvertAccAddressToChainsPrefix(fromAccAddress)
 
-	destinationChain := chooseChain("Select destination chain", sourceChain)
+	destinationChain := chooseChain("Select destination chain", sourceChain, chains.UptickChain)
 	_ = destinationChain
 
 	selectedClass := getUsersNfts(cmd.Context(), clientCtx, sourceChain, fromAddress)
