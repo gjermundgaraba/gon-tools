@@ -16,18 +16,16 @@ The GON cli is a CLI for Game of NFTs. It can create classes/collections/denoms,
 
 Simply run `gon` and follow the instructions:
 
-![ezgif-5-9d3d5d8072.gif](..%2F..%2F..%2FDownloads%2Fezgif-5-9d3d5d8072.gif)
+![gon.gif](./gon.gif)
 
 ### Key management
 To manage keys directly, you can use the familiar `gon keys [command]` commands like `gon keys add --recover`, `gon keys list`, etc.
-
-```bash
 
 ## Installation
 
 ### Download binary
 
-Download the latest release and use it directly.
+[Download](https://github.com/gjermundgaraba/gon-tools/releases/latest/download/gon) the latest release and use it directly.
 
 ### Install from source
 
