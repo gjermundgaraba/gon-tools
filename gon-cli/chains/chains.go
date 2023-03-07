@@ -35,7 +35,7 @@ type Chain interface {
 	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
 
 	CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg
-	CreateTransferNFTMsg(channel NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
+	CreateTransferNFTMsg(channel NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
 	CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg
 
 	ListNFTClassesThatHasNFTs(ctx context.Context, clientContext client.Context, owner string) []NFTClass
@@ -55,8 +55,7 @@ func (n NFTClass) Label() string {
 }
 
 type NFT struct {
-	ID      string
-	ClassID string
+	ID string
 }
 
 func (n NFT) Label() string {

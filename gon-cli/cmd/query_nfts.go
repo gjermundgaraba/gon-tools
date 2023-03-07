@@ -126,6 +126,7 @@ func getUsersNfts(ctx context.Context, clientCtx client.Context, chain chains.Ch
 		}
 
 		var nfts []chains.NFT
+
 		for _, nft := range nftsOwnedResponse.Data.Tokens {
 			nfts = append(nfts, chains.NFT{
 				ID: nft,

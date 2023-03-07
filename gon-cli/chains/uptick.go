@@ -28,7 +28,7 @@ func (c uptickChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sende
 	panic("implement me")
 }
 
-func (c uptickChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c uptickChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	panic("implement me")
 }
 
@@ -52,8 +52,7 @@ func (c uptickChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx cl
 		var nfts []NFT
 		for _, nft := range collection.TokenIds {
 			nfts = append(nfts, NFT{
-				ID:      nft,
-				ClassID: collection.DenomId,
+				ID: nft,
 			})
 		}
 

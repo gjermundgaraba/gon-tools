@@ -4,7 +4,38 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
+	"strings"
 )
+
+func createCosmWasmTransferMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height) sdk.Msg {
+	bridgerContract := strings.TrimPrefix(connection.Port, "wasm.")
+	ibcTransferMsg := fmt.Sprintf(`{
+  "receiver": "%s",
+  "channel_id": "%s",
+  "timeout": {
+    "block": {
+      "revision": %d,
+      "height": %d
+    }
+  }
+}`, toAddress, connection.Channel, timeoutHeight.RevisionNumber, timeoutHeight.RevisionHeight)
+	ibcTransferMsgBase64Encoded := base64.StdEncoding.EncodeToString([]byte(ibcTransferMsg))
+
+	execMsg := fmt.Sprintf(`{
+  "send_nft": {
+    "contract": "%s", 
+    "token_id": "%s", 
+    "msg": "%s"}
+}`, bridgerContract, nft.ID, ibcTransferMsgBase64Encoded)
+	return &wasmdtypes.MsgExecuteContract{
+		Sender:   fromAddress,
+		Contract: class.Contract,
+		Msg:      []byte(execMsg),
+	}
+}
 
 var Decoder = newArgDecoder(asciiDecodeString)
 

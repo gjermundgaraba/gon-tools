@@ -7,6 +7,7 @@ import (
 	"github.com/gjermundgaraba/goncli/chains"
 	"github.com/spf13/cobra"
 	"log"
+	"strings"
 )
 
 func transferNFT(cmd *cobra.Command) error {
@@ -23,12 +24,10 @@ func transferNFT(cmd *cobra.Command) error {
 	destinationChain := chooseChain("Select destination chain", sourceChain)
 	_ = destinationChain
 
-	classes := sourceChain.ListNFTClassesThatHasNFTs(cmd.Context(), clientCtx, fromAddress)
-	if len(classes) == 0 {
-		log.Fatal("No NFT classes found")
+	selectedClass := getUsersNfts(cmd.Context(), clientCtx, sourceChain, fromAddress)
+	if len(selectedClass.NFTs) == 0 {
+		panic("No NFT classes found")
 	}
-
-	selectedClass := chooseOne("Select class", classes)
 
 	// select nft
 	// TODO: Use multiselect to be able to send more than one at a time
@@ -62,16 +61,23 @@ func transferNFT(cmd *cobra.Command) error {
 
 	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, chosenChannel.Port, chosenChannel.Channel)
 
-	msg := sourceChain.CreateTransferNFTMsg(chosenChannel, selectedNFT, fromAddress, destinationAddress, timeoutHeight, timeoutTimestamp)
+	msg := sourceChain.CreateTransferNFTMsg(chosenChannel, selectedClass, selectedNFT, fromAddress, destinationAddress, timeoutHeight, timeoutTimestamp)
 	if err := tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg); err != nil {
-		return err
+		panic(err)
 	}
 
 	fmt.Println()
 	fmt.Println("Initial IBC transfer sent. It might take a moment before it is visible on the destination chain.")
 	fmt.Println()
 	fmt.Println("The destination ibc trace (full Class ID on destination chain) will be:")
-	fmt.Printf("%s/%s/%s\n", chosenConnection.ChannelB.Port, chosenConnection.ChannelB.Channel, selectedNFT.ClassID)
+	var expectedDestinationClass string
+	if strings.HasPrefix(selectedClass.FullPathClassID, fmt.Sprintf("%s/%s", chosenConnection.ChannelA.Port, chosenConnection.ChannelA.Channel)) {
+		fmt.Println("(This is a rewind transaction)")
+		expectedDestinationClass = strings.TrimPrefix(selectedClass.FullPathClassID, fmt.Sprintf("%s/%s/", chosenConnection.ChannelA.Port, chosenConnection.ChannelA.Channel))
+	} else {
+		expectedDestinationClass = fmt.Sprintf("%s/%s/%s", chosenConnection.ChannelB.Port, chosenConnection.ChannelB.Channel, selectedClass.ClassID)
+	}
+	fmt.Println(expectedDestinationClass)
 
 	return nil
 }

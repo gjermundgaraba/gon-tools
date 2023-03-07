@@ -29,11 +29,11 @@ func (c irisChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender,
 	return irisnfttypes.NewMsgIssueDenom(denomID, denomName, schema, sender, symbol, mintRestricted, updateRestricted, description, uri, uriHash, data)
 }
 
-func (c irisChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c irisChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	return &nfttransfertypes.MsgTransfer{
 		SourcePort:       connection.Port,
 		SourceChannel:    connection.Channel,
-		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
+		ClassId:          class.ClassID, // In the case of IBC, it will be the ibc/{hash} format
 		TokenIds:         []string{nft.ID},
 		Sender:           fromAddress,
 		Receiver:         toAddress,
@@ -63,8 +63,7 @@ func (c irisChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx clie
 		var nfts []NFT
 		for _, nft := range collection.TokenIds {
 			nfts = append(nfts, NFT{
-				ID:      nft,
-				ClassID: collection.DenomId,
+				ID: nft,
 			})
 		}
 

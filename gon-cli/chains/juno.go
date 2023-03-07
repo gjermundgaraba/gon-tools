@@ -27,8 +27,8 @@ func (c junoChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sender,
 	panic("implement me")
 }
 
-func (c junoChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	panic("implement me")
+func (c junoChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+	return createCosmWasmTransferMsg(connection, class, nft, fromAddress, toAddress, timeoutHeight)
 }
 
 func (c junoChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {

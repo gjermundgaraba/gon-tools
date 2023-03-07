@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	omniflixnfttypes "github.com/OmniFlix/onft/types"
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -196,6 +197,9 @@ func makeEncodingConfig() EncodingConfig {
 
 	omniflixnfttypes.RegisterInterfaces(interfaceRegistry)
 	omniflixnfttypes.RegisterLegacyAminoCodec(amino)
+
+	wasmdtypes.RegisterInterfaces(interfaceRegistry)
+	wasmdtypes.RegisterLegacyAminoCodec(amino)
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,

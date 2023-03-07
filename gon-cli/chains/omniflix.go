@@ -39,11 +39,11 @@ func (c omnfiFlixChain) CreateIssueCreditClassMsg(denomID, denomName, schema, se
 	}
 }
 
-func (c omnfiFlixChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+func (c omnfiFlixChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
 	return &nfttransfertypes.MsgTransfer{
 		SourcePort:       connection.Port,
 		SourceChannel:    connection.Channel,
-		ClassId:          nft.ClassID, // In the case of IBC, it will be the ibc/{hash} format
+		ClassId:          class.ClassID, // In the case of IBC, it will be the ibc/{hash} format
 		TokenIds:         []string{nft.ID},
 		Sender:           fromAddress,
 		Receiver:         toAddress,
@@ -85,8 +85,7 @@ func (c omnfiFlixChain) ListNFTClassesThatHasNFTs(ctx context.Context, clientCtx
 		var nfts []NFT
 		for _, nft := range collection.OnftIds {
 			nfts = append(nfts, NFT{
-				ID:      nft,
-				ClassID: collection.DenomId,
+				ID: nft,
 			})
 		}
 

@@ -27,8 +27,8 @@ func (c stargazeChain) CreateIssueCreditClassMsg(denomID, denomName, schema, sen
 	panic("implement me")
 }
 
-func (c stargazeChain) CreateTransferNFTMsg(connection NFTChannel, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
-	panic("implement me")
+func (c stargazeChain) CreateTransferNFTMsg(connection NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg {
+	return createCosmWasmTransferMsg(connection, class, nft, fromAddress, toAddress, timeoutHeight)
 }
 
 func (c stargazeChain) CreateMintNFTMsg(tokenID, classID, tokenName, tokenURI, tokenURIHash, tokenData, minterAddress string) sdk.Msg {
