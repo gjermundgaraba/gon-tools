@@ -70,8 +70,8 @@ func getUsersNfts(ctx context.Context, clientCtx client.Context, chain chains.Ch
 			panic("only IBC path class IDs are supported for CosmWasm chains right now")
 		}
 
-		lastPort := splitClassID[len(splitClassID)-3]
-		lastChannel := splitClassID[len(splitClassID)-2]
+		lastPort := splitClassID[0]
+		lastChannel := splitClassID[1]
 		bridgerContract := strings.TrimPrefix(lastPort, "wasm.")
 
 		nftContractQueryData, err := chains.Decoder.DecodeString(fmt.Sprintf(`{"nft_contract": {"class_id" : "%s"}}`, classID))
