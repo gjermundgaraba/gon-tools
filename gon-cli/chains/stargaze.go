@@ -13,12 +13,13 @@ type stargazeChain struct {
 
 var StargazeChain = stargazeChain{
 	ChainData{
-		name:         "Stargaze GoN Testnet",
-		chainID:      "elgafar-1",
-		bech32Prefix: "stars",
-		denom:        "ustars",
-		rpc:          "https://rpc.elgafar-1.stargaze-apis.com:443",
-		grpc:         "http://grpc-1.elgafar-1.stargaze-apis.com:26660",
+		name:              "Stargaze GoN Testnet",
+		chainID:           "elgafar-1",
+		bech32Prefix:      "stars",
+		denom:             "ustars",
+		rpc:               "https://rpc.elgafar-1.stargaze-apis.com:443",
+		grpc:              "http://grpc-1.elgafar-1.stargaze-apis.com:26660",
+		nftImplementation: CosmWasm,
 	},
 }
 

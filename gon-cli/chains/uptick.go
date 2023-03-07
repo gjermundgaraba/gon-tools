@@ -13,12 +13,13 @@ type uptickChain struct {
 
 var UptickChain = uptickChain{
 	ChainData{
-		name:         "Uptick GoN Testnet",
-		chainID:      "uptick_7000-2",
-		bech32Prefix: "uptick",
-		denom:        "auptick",
-		rpc:          "http://52.220.252.160:26657",
-		grpc:         "http://52.220.252.160:9090",
+		name:              "Uptick GoN Testnet",
+		chainID:           "uptick_7000-2",
+		bech32Prefix:      "uptick",
+		denom:             "auptick",
+		rpc:               "http://52.220.252.160:26657",
+		grpc:              "http://52.220.252.160:9090",
+		nftImplementation: CosmosSDK,
 	},
 }
 

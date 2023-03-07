@@ -12,6 +12,13 @@ import (
 	"time"
 )
 
+type NFTImplementation int
+
+const (
+	CosmosSDK NFTImplementation = iota
+	CosmWasm
+)
+
 type Chain interface {
 	Name() string
 	Label() string
@@ -20,6 +27,7 @@ type Chain interface {
 	GRPC() string
 	Bech32Prefix() string
 	Denom() string
+	NFTImplementation() NFTImplementation
 	ConvertAddressToChainsPrefix(address string) string
 	ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string
 
@@ -42,6 +50,7 @@ type NFTClass struct {
 	ClassID         string
 	BaseClassID     string
 	FullPathClassID string
+	Contract        string // CosmWasm only
 	NFTs            []NFT
 	LastIBCChannel  NFTChannel
 }
@@ -62,12 +71,13 @@ func (n NFT) Label() string {
 type ChainID string
 
 type ChainData struct {
-	name         string
-	chainID      ChainID
-	bech32Prefix string
-	denom        string
-	rpc          string
-	grpc         string
+	name              string
+	chainID           ChainID
+	bech32Prefix      string
+	denom             string
+	rpc               string
+	grpc              string
+	nftImplementation NFTImplementation
 }
 
 func (c ChainData) Name() string {
@@ -96,6 +106,10 @@ func (c ChainData) Bech32Prefix() string {
 
 func (c ChainData) Denom() string {
 	return c.denom
+}
+
+func (c ChainData) NFTImplementation() NFTImplementation {
+	return c.nftImplementation
 }
 
 func (c ChainData) ConvertAddressToChainsPrefix(address string) string {

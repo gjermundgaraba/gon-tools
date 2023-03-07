@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func findClassIBCInfo(ctx context.Context, clientCtx client.Context, classID string) (baseClassID string, fullPathClassID string, lastIBCConnection NFTChannel) {
+func findClassIBCInfo(ctx context.Context, clientCtx client.Context, classID string) (baseClassID string, fullPathClassID string, lastIBCChannel NFTChannel) {
 	baseClassID = classID
 	fullPathClassID = classID
 	if strings.HasPrefix(classID, "ibc/") {
@@ -28,7 +28,7 @@ func findClassIBCInfo(ctx context.Context, clientCtx client.Context, classID str
 		pathSplit := strings.Split(traceResp.ClassTrace.Path, "/")
 		latestPort := pathSplit[len(pathSplit)-2]
 		latestChannel := pathSplit[len(pathSplit)-1]
-		lastIBCConnection = NFTChannel{
+		lastIBCChannel = NFTChannel{
 			Port:    latestPort,
 			Channel: latestChannel,
 		}

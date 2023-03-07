@@ -63,6 +63,14 @@ func getClientContext(cmd *cobra.Command, chain chains.Chain) client.Context {
 	return clientCtx.WithChainID(string(chain.ChainID()))
 }
 
+func askForString(question string, opts ...survey.AskOpt) (answer string) {
+	if err := survey.AskOne(&survey.Input{Message: question}, &answer, opts...); err != nil {
+		panic(err)
+	}
+
+	return
+}
+
 func chooseChain(questionPhrasing string, filterOut ...chains.Chain) chains.Chain {
 	var chainOptions []chains.Chain
 	for _, chain := range chains.Chains {

@@ -20,20 +20,11 @@ func mintNFT(cmd *cobra.Command) error {
 	}
 	fromAddress := chain.ConvertAccAddressToChainsPrefix(fromAccAddress)
 
-	var classID string
-	if err := survey.AskOne(&survey.Input{Message: "Class ID"}, &classID, survey.WithValidator(idValidator)); err != nil {
-		return err
-	}
+	classID := askForString("Class ID", survey.WithValidator(idValidator))
 
-	var nftID string
-	if err := survey.AskOne(&survey.Input{Message: "NFT ID"}, &nftID, survey.WithValidator(idValidator)); err != nil {
-		return err
-	}
+	nftID := askForString("NFT ID", survey.WithValidator(idValidator))
 
-	var name string
-	if err := survey.AskOne(&survey.Input{Message: "Name (Optional)"}, &name); err != nil {
-		return err
-	}
+	name := askForString("Name (Optional)")
 
 	var data string
 	if err := survey.AskOne(&survey.Editor{
@@ -43,16 +34,11 @@ func mintNFT(cmd *cobra.Command) error {
 		return err
 	}
 
-	var uri string
-	if err := survey.AskOne(&survey.Input{Message: "URI (Optional)"}, &uri); err != nil {
-		return err
-	}
+	uri := askForString("URI (Optional)")
 
 	var uriHash string
 	if uri != "" {
-		if err := survey.AskOne(&survey.Input{Message: "URI Hash (Optional)"}, &uriHash); err != nil {
-			return err
-		}
+		uriHash = askForString("URI Hash (Optional)")
 	}
 
 	msg := chain.CreateMintNFTMsg(nftID, classID, name, uri, uriHash, data, fromAddress)

@@ -15,12 +15,13 @@ type omnfiFlixChain struct {
 
 var OmniFlixChain = omnfiFlixChain{
 	ChainData{
-		name:         "OmniFlix GoN Testnet",
-		chainID:      "gon-flixnet-1",
-		bech32Prefix: "omniflix",
-		denom:        "uflix",
-		rpc:          "http://65.21.93.56:26657",
-		grpc:         "http://65.21.93.56:9090",
+		name:              "OmniFlix GoN Testnet",
+		chainID:           "gon-flixnet-1",
+		bech32Prefix:      "omniflix",
+		denom:             "uflix",
+		rpc:               "http://65.21.93.56:26657",
+		grpc:              "http://65.21.93.56:9090",
+		nftImplementation: CosmosSDK,
 	},
 }
 

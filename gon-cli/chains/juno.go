@@ -13,12 +13,13 @@ type junoChain struct {
 
 var JunoChain = junoChain{
 	ChainData{
-		name:         "Juno GoN Testnet",
-		chainID:      "uni-6",
-		bech32Prefix: "juno",
-		denom:        "ujunox",
-		rpc:          "https://rpc.uni.junonetwork.io:443",
-		grpc:         "http://juno-testnet-grpc.polkachu.com:12690",
+		name:              "Juno GoN Testnet",
+		chainID:           "uni-6",
+		bech32Prefix:      "juno",
+		denom:             "ujunox",
+		rpc:               "https://rpc.uni.junonetwork.io:443",
+		grpc:              "http://juno-testnet-grpc.polkachu.com:12690",
+		nftImplementation: CosmWasm,
 	},
 }
 

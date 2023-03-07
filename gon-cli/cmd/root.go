@@ -30,11 +30,14 @@ const (
 	mintNFTOption  OptionString = "Mint NFT"
 	mintNFTCommand              = "mint"
 
-	queryNFTClassesOption  OptionString = "Query NFT Classes for which you own NFTs"
-	queryNFTClassesCommand              = "query-classes"
+	queryNFTSOption  OptionString = "Query NFTs you own"
+	queryNFTSCommand              = "query-nfts"
 
 	transferNFTOption  OptionString = "Transfer NFT (Over IBC)"
 	transferNFTCommand              = "transfer"
+
+	listConnectionsOption  OptionString = "List Connections"
+	listConnectionsCommand              = "list-connections"
 )
 
 func NewRootCmd(appHomeDir string) *cobra.Command {
@@ -56,9 +59,10 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 [optional-command] can be one of the following:
 - %s (creates a new NFT class)
 - %s (mints a new NFT)
-- %s (queries your NFT classes)
+- %s (queries your NFTs)
 - %s (transfers an NFT over IBC)
-`, createNFTClassCommand, mintNFTCommand, queryNFTClassesCommand, transferNFTCommand),
+- %s (lists available connections between to chains)
+`, createNFTClassCommand, mintNFTCommand, queryNFTSCommand, transferNFTCommand, listConnectionsCommand),
 		Args: cobra.ArbitraryArgs,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
@@ -94,7 +98,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				createNFTClassOption,
 				mintNFTOption,
 				transferNFTOption,
-				queryNFTClassesOption,
+				queryNFTSOption,
+				listConnectionsOption,
 			}
 
 			var topLevelChoice OptionString
@@ -106,8 +111,10 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = mintNFTOption
 				case transferNFTCommand:
 					topLevelChoice = transferNFTOption
-				case queryNFTClassesCommand:
-					topLevelChoice = queryNFTClassesOption
+				case queryNFTSCommand:
+					topLevelChoice = queryNFTSOption
+				case listConnectionsCommand:
+					topLevelChoice = listConnectionsOption
 				default:
 					panic("invalid command")
 				}
@@ -122,8 +129,12 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return mintNFT(cmd)
 			case transferNFTOption:
 				return transferNFT(cmd)
-			case queryNFTClassesOption:
-				return queryNFTClasses(cmd)
+			case queryNFTSOption:
+				return queryNFTs(cmd)
+			case listConnectionsOption:
+				return listConnections(cmd)
+			default:
+				panic(topLevelChoice + " not implemented option")
 			}
 			return nil
 		},
