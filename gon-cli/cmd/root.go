@@ -54,7 +54,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 		WithViper("")
 
 	rootCmd := &cobra.Command{
-		Use:   "gon-cli [optional-command]",
+		Use:   "gon [optional-command]",
 		Short: "Game of NFTs - made simple!",
 		Long: fmt.Sprintf(`Game of NFTs - made simple!
 [optional-command] can be one of the following:

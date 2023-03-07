@@ -107,7 +107,7 @@ func chooseWallet(cmd *cobra.Command) string {
 	}
 
 	if len(records) == 0 {
-		log.Fatal("No wallets found, please add one with 'goncli keys add <name>' (--recover to recover from mnemonic)")
+		log.Fatal("No wallets found, please add one with 'gon keys add <name>' (--recover to recover from mnemonic)")
 	}
 
 	var walletNames []OptionString

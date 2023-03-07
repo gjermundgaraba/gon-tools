@@ -26,8 +26,8 @@ func findClassIBCInfo(ctx context.Context, clientCtx client.Context, classID str
 		baseClassID = traceResp.ClassTrace.BaseClassId
 		fullPathClassID = fmt.Sprintf("%s/%s", traceResp.ClassTrace.Path, baseClassID)
 		pathSplit := strings.Split(traceResp.ClassTrace.Path, "/")
-		latestPort := pathSplit[len(pathSplit)-2]
-		latestChannel := pathSplit[len(pathSplit)-1]
+		latestPort := pathSplit[0]
+		latestChannel := pathSplit[1]
 		lastIBCChannel = NFTChannel{
 			Port:    latestPort,
 			Channel: latestChannel,
