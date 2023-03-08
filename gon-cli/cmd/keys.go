@@ -188,16 +188,15 @@ func listKeys(kr keyring.Keyring) {
 }
 
 func printAddressesForKey(kr keyring.Keyring, record *keyring.Record) {
-	accAddr, err := record.GetAddress()
-	if err != nil {
-		panic(err)
-	}
-
 	if strings.HasSuffix(record.Name, ethermintKeyNameSuffix) {
 		panic("ethermint key should not be printed")
 	}
 
 	for _, chain := range chains.Chains {
+		accAddr, err := record.GetAddress()
+		if err != nil {
+			panic(err)
+		}
 		algoType := record.PubKey.GetTypeUrl()
 		if chain.KeyAlgo() == chains.KeyAlgoEthSecp256k1 {
 			// get the ethermint key
