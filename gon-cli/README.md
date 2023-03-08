@@ -18,6 +18,12 @@ Simply run `gon` and follow the instructions:
 
 ![gon.gif](./gon.gif)
 
+### Editor
+The editor, which is used for multiline fields, might default to `vim` in many peoples environment. You can override this by setting the `EDITOR` environment variable (to for instance nano), or simply set it when calling the cli like this:
+```bash
+$ EDITOR=nano gon
+```
+
 ### Key management
 To manage keys directly, you can use the familiar `gon keys [command]` commands like `gon keys add --recover`, `gon keys list`, etc.
 
