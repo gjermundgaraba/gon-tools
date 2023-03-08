@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -20,6 +19,7 @@ import (
 	ibctypes "github.com/cosmos/ibc-go/v5/modules/core/types"
 	irisnfttypes "github.com/irisnet/irismod/modules/nft/types"
 	"github.com/spf13/cobra"
+	"github.com/strangelove-ventures/lens/client/codecs/ethermint"
 	tmcfg "github.com/tendermint/tendermint/config"
 	"os"
 )
@@ -39,6 +39,12 @@ const (
 
 	listConnectionsOption  OptionString = "List Connections"
 	listConnectionsCommand              = "list-connections"
+
+	manageKeysOption  OptionString = "Manage Keys"
+	manageKeysCommand              = "manage-keys"
+
+	queryTransactionOption  OptionString = "Query Transaction"
+	queryTransactionCommand              = "query-tx"
 )
 
 func NewRootCmd(appHomeDir string) *cobra.Command {
@@ -80,6 +86,9 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return err
 			}
 
+			// Overwrite here, because config.ReadFromClientConfig sets it...
+			initClientCtx = initClientCtx.WithKeyring(getKeyring(encodingConfig.Codec))
+
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
@@ -90,17 +99,14 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			wallet := chooseWallet(cmd)
-			if err := cmd.Flags().Set(flags.FlagFrom, wallet); err != nil {
-				panic(err)
-			}
-
 			topLevelOptions := []OptionString{
 				createNFTClassOption,
 				mintNFTOption,
 				transferNFTOption,
 				queryNFTSOption,
 				listConnectionsOption,
+				manageKeysOption,
+				queryTransactionOption,
 			}
 
 			var topLevelChoice OptionString
@@ -116,6 +122,10 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = queryNFTSOption
 				case listConnectionsCommand:
 					topLevelChoice = listConnectionsOption
+				case manageKeysCommand:
+					topLevelChoice = manageKeysOption
+				case queryTransactionCommand:
+					topLevelChoice = queryTransactionOption
 				default:
 					panic("invalid command")
 				}
@@ -134,16 +144,17 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return queryNFTs(cmd)
 			case listConnectionsOption:
 				return listConnections(cmd)
+			case manageKeysOption:
+				return manageKeys(cmd)
+			case queryTransactionOption:
+				queryTransaction(cmd)
+				return nil
 			default:
 				panic(topLevelChoice + " not implemented option")
 			}
 			return nil
 		},
 	}
-
-	rootCmd.AddCommand(
-		keys.Commands(appHomeDir),
-	)
 
 	flags.AddTxFlagsToCmd(rootCmd)
 
@@ -200,6 +211,8 @@ func makeEncodingConfig() EncodingConfig {
 
 	wasmdtypes.RegisterInterfaces(interfaceRegistry)
 	wasmdtypes.RegisterLegacyAminoCodec(amino)
+
+	ethermint.RegisterInterfaces(interfaceRegistry)
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,

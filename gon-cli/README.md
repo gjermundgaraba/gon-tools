@@ -9,7 +9,7 @@ The GON cli is a CLI for Game of NFTs. It can create classes/collections/denoms,
 | IRIS     | ✅            | ✅         | ✅                        | ✅          |
 | Stargaze | ❌            | ❌         | ✅                        | ✅          |
 | Juno     | ❌            | ❌         | ✅                        | ✅          |
-| Uptick   | ❌            | ❌         | ❌                        | ❌          |
+| Uptick   | ❌            | ❌         | ✅                        | ✅          |
 | OmniFlix | ❌            | ❌         | ✅                        | ✅          |
 
 ## Usage

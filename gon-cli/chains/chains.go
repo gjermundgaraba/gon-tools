@@ -19,6 +19,13 @@ const (
 	CosmWasm
 )
 
+type KeyAlgo int
+
+const (
+	KeyAlgoSecp256k1 KeyAlgo = iota
+	KeyAlgoEthSecp256k1
+)
+
 type Chain interface {
 	Name() string
 	Label() string
@@ -27,9 +34,8 @@ type Chain interface {
 	GRPC() string
 	Bech32Prefix() string
 	Denom() string
+	KeyAlgo() KeyAlgo
 	NFTImplementation() NFTImplementation
-	ConvertAddressToChainsPrefix(address string) string
-	ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string
 
 	GetConnectionsTo(chain Chain) []NFTConnection
 	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
@@ -69,6 +75,7 @@ type ChainData struct {
 	chainID           ChainID
 	bech32Prefix      string
 	denom             string
+	keyAlgo           KeyAlgo
 	rpc               string
 	grpc              string
 	nftImplementation NFTImplementation
@@ -102,21 +109,12 @@ func (c ChainData) Denom() string {
 	return c.denom
 }
 
-func (c ChainData) NFTImplementation() NFTImplementation {
-	return c.nftImplementation
+func (c ChainData) KeyAlgo() KeyAlgo {
+	return c.keyAlgo
 }
 
-func (c ChainData) ConvertAddressToChainsPrefix(address string) string {
-	_, acc, err := bech32.DecodeAndConvert(address)
-	if err != nil {
-		log.Fatalf("Error converting address: %v", err)
-	}
-	convertedAddress, err := bech32.ConvertAndEncode(c.bech32Prefix, acc)
-	if err != nil {
-		log.Fatalf("Error converting address: %v", err)
-	}
-
-	return convertedAddress
+func (c ChainData) NFTImplementation() NFTImplementation {
+	return c.nftImplementation
 }
 
 func (c ChainData) ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string {

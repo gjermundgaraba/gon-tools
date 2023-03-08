@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
@@ -11,22 +12,24 @@ import (
 )
 
 func transferNFT(cmd *cobra.Command) error {
-	sourceChain := chooseChain("Select source chain", chains.UptickChain)
+	sourceChain := chooseChain("Select source chain")
 	setAddressPrefixes(sourceChain.Bech32Prefix())
 
-	clientCtx := getClientContext(cmd, sourceChain)
-	fromAccAddress := clientCtx.GetFromAddress()
-	if fromAccAddress == nil {
-		log.Fatal("No --from wallet/address specified")
+	key := chooseOrCreateKey(cmd, sourceChain)
+	if err := cmd.Flags().Set(flags.FlagFrom, key); err != nil {
+		panic(err)
 	}
-	fromAddress := sourceChain.ConvertAccAddressToChainsPrefix(fromAccAddress)
 
-	destinationChain := chooseChain("Select destination chain", sourceChain, chains.UptickChain)
+	clientCtx := getClientContext(cmd, sourceChain)
+	fromAddress := getAddressForChain(clientCtx, sourceChain, key)
+
+	destinationChain := chooseChain("Select destination chain", sourceChain)
 	_ = destinationChain
 
 	selectedClass := getUsersNfts(cmd.Context(), clientCtx, sourceChain, fromAddress)
 	if len(selectedClass.NFTs) == 0 {
-		panic("No NFT classes found")
+		fmt.Println("No NFT classes found")
+		return nil
 	}
 
 	// select nft
@@ -38,7 +41,8 @@ func transferNFT(cmd *cobra.Command) error {
 		log.Fatalf("Error getting destination address: %v", err)
 	}
 	if destinationAddress == "" {
-		destinationAddress = destinationChain.ConvertAddressToChainsPrefix(fromAddress)
+		destinationAddress = getAddressForChain(clientCtx, destinationChain, key)
+		fmt.Println("Destination address:", destinationAddress)
 	}
 
 	connections := sourceChain.GetConnectionsTo(destinationChain)
@@ -67,7 +71,8 @@ func transferNFT(cmd *cobra.Command) error {
 	}
 
 	fmt.Println()
-	fmt.Println("Initial IBC transfer sent. It might take a moment before it is visible on the destination chain.")
+	fmt.Println("Initial IBC transfer transaction broadcast. It might take a moment before it is visible on the destination chain.")
+	fmt.Println("Keep in mind that even if this tx succeeds, the IBC transfer might still fail on the destination chain.")
 	fmt.Println()
 	fmt.Println("The destination ibc trace (full Class ID on destination chain) will be:")
 	var expectedDestinationClass string

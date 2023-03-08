@@ -17,6 +17,7 @@ var StargazeChain = stargazeChain{
 		chainID:           "elgafar-1",
 		bech32Prefix:      "stars",
 		denom:             "ustars",
+		keyAlgo:           KeyAlgoSecp256k1,
 		rpc:               "https://rpc.elgafar-1.stargaze-apis.com:443",
 		grpc:              "http://grpc-1.elgafar-1.stargaze-apis.com:26660",
 		nftImplementation: CosmWasm,

@@ -45,13 +45,10 @@ func getClientContext(cmd *cobra.Command, chain chains.Chain) client.Context {
 	if err := cmd.Flags().Set(flags.FlagNode, chain.RPC()); err != nil {
 		panic(err)
 	}
-	if err := cmd.Flags().Set(flags.FlagGas, "auto"); err != nil {
+	if err := cmd.Flags().Set(flags.FlagFees, fmt.Sprintf("25000%s", chain.Denom())); err != nil {
 		panic(err)
 	}
-	if err := cmd.Flags().Set(flags.FlagGasAdjustment, "1.5"); err != nil {
-		panic(err)
-	}
-	if err := cmd.Flags().Set(flags.FlagGasPrices, fmt.Sprintf("0.25%s", chain.Denom())); err != nil {
+	if err := cmd.Flags().Set(flags.FlagGas, "1000000"); err != nil {
 		panic(err)
 	}
 
@@ -69,6 +66,15 @@ func askForString(question string, opts ...survey.AskOpt) (answer string) {
 	}
 
 	return
+}
+
+func askForConfirmation(question string) bool {
+	var answer bool
+	if err := survey.AskOne(&survey.Confirm{Message: question}, &answer); err != nil {
+		panic(err)
+	}
+
+	return answer
 }
 
 func chooseChain(questionPhrasing string, filterOut ...chains.Chain) chains.Chain {
@@ -89,33 +95,6 @@ func chooseChain(questionPhrasing string, filterOut ...chains.Chain) chains.Chai
 	}
 
 	return chooseOne(questionPhrasing, chainOptions)
-}
-
-func chooseWallet(cmd *cobra.Command) string {
-	if from, _ := cmd.Flags().GetString(flags.FlagFrom); from != "" {
-		return from
-	}
-
-	clientCtx, err := client.GetClientQueryContext(cmd)
-	if err != nil {
-		panic(err)
-	}
-
-	records, err := clientCtx.Keyring.List()
-	if err != nil {
-		panic(err)
-	}
-
-	if len(records) == 0 {
-		log.Fatal("No wallets found, please add one with 'gon keys add <name>' (--recover to recover from mnemonic)")
-	}
-
-	var walletNames []OptionString
-	for _, o := range records {
-		walletNames = append(walletNames, OptionString(o.Name))
-	}
-
-	return string(chooseOne("Choose a wallet", walletNames))
 }
 
 type Option interface {

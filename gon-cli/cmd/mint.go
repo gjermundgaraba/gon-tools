@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 func mintNFT(cmd *cobra.Command) error {
@@ -13,12 +13,13 @@ func mintNFT(cmd *cobra.Command) error {
 	chain := chooseChain("Select chain to mint NFT on", chains.StargazeChain, chains.JunoChain, chains.UptickChain, chains.OmniFlixChain)
 	setAddressPrefixes(chain.Bech32Prefix())
 
-	clientCtx := getClientContext(cmd, chain)
-	fromAccAddress := clientCtx.GetFromAddress()
-	if fromAccAddress == nil {
-		log.Fatal("No --from wallet/address specified")
+	key := chooseOrCreateKey(cmd, chain)
+	if err := cmd.Flags().Set(flags.FlagFrom, key); err != nil {
+		panic(err)
 	}
-	fromAddress := chain.ConvertAccAddressToChainsPrefix(fromAccAddress)
+
+	clientCtx := getClientContext(cmd, chain)
+	fromAddress := getAddressForChain(clientCtx, chain, key)
 
 	classID := askForString("Class ID", survey.WithValidator(idValidator))
 

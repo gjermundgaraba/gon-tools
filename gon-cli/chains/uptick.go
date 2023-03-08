@@ -18,6 +18,7 @@ var UptickChain = uptickChain{
 		chainID:           "uptick_7000-2",
 		bech32Prefix:      "uptick",
 		denom:             "auptick",
+		keyAlgo:           KeyAlgoEthSecp256k1,
 		rpc:               "http://52.220.252.160:26657",
 		grpc:              "http://52.220.252.160:9090",
 		nftImplementation: CosmosSDK,

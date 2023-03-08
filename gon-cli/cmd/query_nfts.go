@@ -5,6 +5,7 @@ import (
 	"fmt"
 	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/json"
@@ -26,12 +27,13 @@ func queryNFTs(cmd *cobra.Command) error {
 	chain := chooseChain("Select chain to create NFT on")
 	setAddressPrefixes(chain.Bech32Prefix())
 
-	clientCtx := getClientContext(cmd, chain)
-	fromAccAddress := clientCtx.GetFromAddress()
-	if fromAccAddress == nil {
-		log.Fatal("No --from wallet/address specified")
+	key := chooseOrCreateKey(cmd, chain)
+	if err := cmd.Flags().Set(flags.FlagFrom, key); err != nil {
+		panic(err)
 	}
-	fromAddress := chain.ConvertAccAddressToChainsPrefix(fromAccAddress)
+
+	clientCtx := getClientContext(cmd, chain)
+	fromAddress := getAddressForChain(clientCtx, chain, key)
 
 	class := getUsersNfts(cmd.Context(), clientCtx, chain, fromAddress)
 	fmt.Printf("Class ID: %s \n", class.ClassID)
@@ -99,7 +101,7 @@ func getUsersNfts(ctx context.Context, clientCtx client.Context, chain chains.Ch
 		}
 		nftContract := nftContractResponse.Data
 		if nftContract == "" {
-			panic("no NFT contract found, make sure you are using the full IBC path/trace with port/channel/class-id")
+			log.Fatal("no NFT contract found, make sure you are using the full IBC path/trace with port/channel/class-id")
 		}
 
 		nftsOwnedQueryData, err := chains.Decoder.DecodeString(fmt.Sprintf(`{"tokens":{"owner": "%s"}}`, address))

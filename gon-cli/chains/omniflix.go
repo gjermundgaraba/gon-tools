@@ -18,6 +18,7 @@ var OmniFlixChain = omnfiFlixChain{
 		chainID:           "gon-flixnet-1",
 		bech32Prefix:      "omniflix",
 		denom:             "uflix",
+		keyAlgo:           KeyAlgoSecp256k1,
 		rpc:               "http://65.21.93.56:26657",
 		grpc:              "http://65.21.93.56:9090",
 		nftImplementation: CosmosSDK,

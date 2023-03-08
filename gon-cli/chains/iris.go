@@ -18,6 +18,7 @@ var IRISChain = irisChain{
 		chainID:           "gon-irishub-1",
 		bech32Prefix:      "iaa",
 		denom:             "uiris",
+		keyAlgo:           KeyAlgoSecp256k1,
 		rpc:               "http://34.80.93.133:26657",
 		grpc:              "http://34.80.93.133:9090",
 		nftImplementation: CosmosSDK,
