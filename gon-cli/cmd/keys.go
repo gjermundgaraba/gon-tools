@@ -60,7 +60,7 @@ func chooseOrCreateKey(cmd *cobra.Command, chain chains.Chain) string {
 	return keyName
 }
 
-func manageKeys(cmd *cobra.Command) error {
+func manageKeys(cmd *cobra.Command) {
 	clientCtx, err := client.GetClientTxContext(cmd)
 	if err != nil {
 		panic(err)
@@ -71,16 +71,11 @@ func manageKeys(cmd *cobra.Command) error {
 	switch action {
 	case keyOptionCreate:
 		_ = createKey(clientCtx.Keyring)
-		return nil
 	case keyOptionList:
 		listKeys(clientCtx.Keyring)
-		return nil
 	case keyOptionDelete:
 		deleteKey(clientCtx.Keyring)
-		return nil
 	}
-
-	return nil
 }
 
 func createKey(kr keyring.Keyring) string {

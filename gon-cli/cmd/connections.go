@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 )
 
-func listConnections(cmd *cobra.Command) error {
+func listConnections() {
 	sourceChain := chooseChain("From chain:")
 	destinationChain := chooseChain("To chain:")
 
@@ -20,6 +19,4 @@ func listConnections(cmd *cobra.Command) error {
 			fmt.Println()
 		}
 	}
-
-	return nil
 }

@@ -5,7 +5,6 @@ import (
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/bech32"
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	channelutils "github.com/cosmos/ibc-go/v5/modules/core/04-channel/client/utils"
 	"log"
@@ -115,15 +114,6 @@ func (c ChainData) KeyAlgo() KeyAlgo {
 
 func (c ChainData) NFTImplementation() NFTImplementation {
 	return c.nftImplementation
-}
-
-func (c ChainData) ConvertAccAddressToChainsPrefix(acc sdk.AccAddress) string {
-	convertedAddress, err := bech32.ConvertAndEncode(c.bech32Prefix, acc.Bytes())
-	if err != nil {
-		log.Fatalf("Error converting address: %v", err)
-	}
-
-	return convertedAddress
 }
 
 func (c ChainData) GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64) {

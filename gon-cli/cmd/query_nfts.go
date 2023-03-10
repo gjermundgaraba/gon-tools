@@ -23,7 +23,7 @@ type queryNFTSOwnedResponse struct {
 	} `json:"data"`
 }
 
-func queryNFTs(cmd *cobra.Command) error {
+func queryNFTsInteractive(cmd *cobra.Command) error {
 	chain := chooseChain("Select chain to create NFT on")
 	setAddressPrefixes(chain.Bech32Prefix())
 
@@ -32,7 +32,7 @@ func queryNFTs(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientContext(cmd, chain)
+	clientCtx := getClientTxContext(cmd, chain)
 	fromAddress := getAddressForChain(clientCtx, chain, key)
 
 	class := getUsersNfts(cmd.Context(), clientCtx, chain, fromAddress)

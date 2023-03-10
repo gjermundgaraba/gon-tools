@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func mintNFT(cmd *cobra.Command) error {
+func mintNFTInteractive(cmd *cobra.Command) error {
 	// TODO: Add support for juno, uptick and omniflix
 	chain := chooseChain("Select chain to mint NFT on", chains.StargazeChain, chains.JunoChain, chains.UptickChain, chains.OmniFlixChain)
 	setAddressPrefixes(chain.Bech32Prefix())
@@ -18,7 +18,7 @@ func mintNFT(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientContext(cmd, chain)
+	clientCtx := getClientTxContext(cmd, chain)
 	fromAddress := getAddressForChain(clientCtx, chain, key)
 
 	classID := askForString("Class ID", survey.WithValidator(idValidator))

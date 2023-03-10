@@ -10,10 +10,10 @@ func queryTransaction(cmd *cobra.Command) {
 	chain := chooseChain("Select chain to create NFT on")
 	setAddressPrefixes(chain.Bech32Prefix())
 
-	clientCtx := getClientContext(cmd, chain)
+	clientCtx := getClientTxContext(cmd, chain)
 
-	tx := askForString("Transaction hash", survey.WithValidator(survey.Required))
-	output, err := authtx.QueryTx(clientCtx, tx)
+	txHash := askForString("Transaction hash", survey.WithValidator(survey.Required))
+	output, err := authtx.QueryTx(clientCtx, txHash)
 	if err != nil {
 		panic(err)
 	}

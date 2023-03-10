@@ -37,14 +37,8 @@ const (
 	transferNFTOption  OptionString = "Transfer NFT (Over IBC)"
 	transferNFTCommand              = "transfer"
 
-	listConnectionsOption  OptionString = "List Connections"
-	listConnectionsCommand              = "list-connections"
-
-	manageKeysOption  OptionString = "Manage Keys"
-	manageKeysCommand              = "manage-keys"
-
-	queryTransactionOption  OptionString = "Query Transaction"
-	queryTransactionCommand              = "query-tx"
+	toolsOption  OptionString = "Helper tools"
+	toolsCommand              = "tools"
 )
 
 func NewRootCmd(appHomeDir string) *cobra.Command {
@@ -104,9 +98,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				mintNFTOption,
 				transferNFTOption,
 				queryNFTSOption,
-				listConnectionsOption,
-				manageKeysOption,
-				queryTransactionOption,
+				toolsOption,
 			}
 
 			var topLevelChoice OptionString
@@ -120,12 +112,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = transferNFTOption
 				case queryNFTSCommand:
 					topLevelChoice = queryNFTSOption
-				case listConnectionsCommand:
-					topLevelChoice = listConnectionsOption
-				case manageKeysCommand:
-					topLevelChoice = manageKeysOption
-				case queryTransactionCommand:
-					topLevelChoice = queryTransactionOption
+				case toolsCommand:
+					topLevelChoice = toolsOption
 				default:
 					panic("invalid command")
 				}
@@ -135,19 +123,15 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 
 			switch topLevelChoice {
 			case createNFTClassOption:
-				return createNFTClass(cmd)
+				return createNFTClassInteractive(cmd)
 			case mintNFTOption:
-				return mintNFT(cmd)
+				return mintNFTInteractive(cmd)
 			case transferNFTOption:
-				return transferNFT(cmd)
+				return transferNFTInteractive(cmd)
 			case queryNFTSOption:
-				return queryNFTs(cmd)
-			case listConnectionsOption:
-				return listConnections(cmd)
-			case manageKeysOption:
-				return manageKeys(cmd)
-			case queryTransactionOption:
-				queryTransaction(cmd)
+				return queryNFTsInteractive(cmd)
+			case toolsOption:
+				toolsInteractive(cmd, args)
 				return nil
 			default:
 				panic(topLevelChoice + " not implemented option")

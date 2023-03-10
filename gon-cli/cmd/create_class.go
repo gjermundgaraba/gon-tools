@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createNFTClass(cmd *cobra.Command) error {
+func createNFTClassInteractive(cmd *cobra.Command) error {
 	// TODO: Add support for juno, uptick
 	chain := chooseChain("Select chain to create NFT on", chains.StargazeChain, chains.JunoChain, chains.UptickChain)
 	setAddressPrefixes(chain.Bech32Prefix())
@@ -18,7 +18,7 @@ func createNFTClass(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientContext(cmd, chain)
+	clientCtx := getClientTxContext(cmd, chain)
 	fromAddress := getAddressForChain(clientCtx, chain, key)
 
 	var classID string
