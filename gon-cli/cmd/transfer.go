@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/cobra"
-	"log"
-	"strings"
 )
 
 func transferNFTInteractive(cmd *cobra.Command) error {
@@ -52,7 +53,7 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 	chosenChannel := chosenConnection.ChannelA
 
 	tryToForceTimeout, _ := cmd.Flags().GetBool(flagTryToForceTimeout)
-	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, chosenChannel.Port, chosenChannel.Channel, tryToForceTimeout)
+	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(cmd, clientCtx, destinationChain, chosenChannel.Port, chosenChannel.Channel, tryToForceTimeout)
 
 	msg := sourceChain.CreateTransferNFTMsg(chosenChannel, selectedClass, selectedNFT, fromAddress, destinationAddress, timeoutHeight, timeoutTimestamp)
 	if tryToForceTimeout {
