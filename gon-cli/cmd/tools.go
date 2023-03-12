@@ -20,6 +20,9 @@ const (
 
 	generateTraceOption  OptionString = "Generate Trace manually"
 	generateTraceCommand              = "generate-trace"
+
+	relayerCommandsOption  OptionString = "Relayer Commands"
+	relayerCommandsCommand              = "relayer-commands"
 )
 
 func toolsInteractive(cmd *cobra.Command, args []string) {
@@ -30,6 +33,7 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 		queryTransactionOption,
 		calculateClassHashOption,
 		generateTraceOption,
+		relayerCommandsOption,
 	}
 
 	var toolsChoice OptionString
@@ -47,6 +51,8 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 			toolsChoice = calculateClassHashOption
 		case generateTraceCommand:
 			toolsChoice = generateTraceOption
+		case relayerCommandsCommand:
+			toolsChoice = relayerCommandsOption
 		default:
 			panic("invalid command")
 		}
@@ -67,5 +73,7 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 		calculateClassHashInteractive()
 	case generateTraceOption:
 		generateTraceInteractive()
+	case relayerCommandsOption:
+		relayerCommandsInteractive()
 	}
 }

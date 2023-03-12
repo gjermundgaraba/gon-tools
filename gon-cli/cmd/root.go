@@ -25,6 +25,8 @@ import (
 )
 
 const (
+	flagTryToForceTimeout = "try-to-timeout"
+
 	createNFTClassOption  OptionString = "Create NFT Class"
 	createNFTClassCommand              = "create-class"
 
@@ -141,6 +143,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(rootCmd)
+	rootCmd.Flags().Bool(flagTryToForceTimeout, false, "Try to force a timeout")
 
 	return rootCmd
 }

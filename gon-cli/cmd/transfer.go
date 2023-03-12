@@ -51,9 +51,13 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 	chosenConnection := chooseConnection(sourceChain, destinationChain, chooseChannelQuestion)
 	chosenChannel := chosenConnection.ChannelA
 
-	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, chosenChannel.Port, chosenChannel.Channel)
+	tryToForceTimeout, _ := cmd.Flags().GetBool(flagTryToForceTimeout)
+	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, chosenChannel.Port, chosenChannel.Channel, tryToForceTimeout)
 
 	msg := sourceChain.CreateTransferNFTMsg(chosenChannel, selectedClass, selectedNFT, fromAddress, destinationAddress, timeoutHeight, timeoutTimestamp)
+	if tryToForceTimeout {
+		clientCtx = clientCtx.WithSkipConfirmation(true)
+	}
 	txResponse, err := sendTX(clientCtx, cmd.Flags(), msg)
 	if err != nil {
 		panic(err)
@@ -74,6 +78,12 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 
 	fmt.Println()
 	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash)
+	fmt.Println()
+	fmt.Println("The destination ibc trace (full Class ID on destination chain):")
+	if isRewind {
+		fmt.Println("(This is a rewind transaction)")
+	}
+	fmt.Println(expectedDestinationClass)
 
 	return nil
 }

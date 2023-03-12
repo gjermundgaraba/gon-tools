@@ -18,7 +18,7 @@ func findIBCTransactionsInteractive(cmd *cobra.Command) {
 }
 
 func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string) {
-	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet")
+	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
 	connection := findConnection(txResp)
 	timeoutHeight, timeoutTimestamp := findTimeouts(txResp)
@@ -108,19 +108,30 @@ func waitForIBCPacket(cmd *cobra.Command, sourceChain chains.Chain, destinationC
 			fmt.Sprintf("recv_packet.packet_dst_port='%s'", connection.ChannelB.Port),
 			fmt.Sprintf("recv_packet.packet_dst_channel='%s'", connection.ChannelB.Channel),
 		},
+		"Receive IBC transaction",
 		fmt.Sprintf("Receive IBC transaction for port: %s, channel: %s, sequence %s", connection.ChannelB.Port, connection.ChannelB.Channel, packetSequence),
+		fmt.Sprintf("If the message does not get relayed, you can relay it yourself with hermes using the following command:\n hermes tx packet-recv --dst-chain %s --src-chain %s --src-port %s --src-channel %s\n", destinationChain.ChainID(), sourceChain.ChainID(), connection.ChannelA.Port, connection.ChannelA.Channel),
 		timeoutHeight,
 		timeoutTimestamp,
 	)
 
 	if timeout {
 		fmt.Println("❌ IBC packet timed out")
-		_, _ = waitForTXByEvents(cmd, sourceChain, []string{
-			fmt.Sprintf("timeout_packet.packet_sequence='%s'", packetSequence),
-			fmt.Sprintf("timeout_packet.packet_src_port='%s'", connection.ChannelA.Port),
-			fmt.Sprintf("timeout_packet.packet_src_channel='%s'", connection.ChannelA.Channel),
-			fmt.Sprintf("timeout_packet.packet_dst_port='%s'", connection.ChannelB.Port),
-			fmt.Sprintf("timeout_packet.packet_dst_channel='%s'", connection.ChannelB.Channel),
-		}, "Timeout/revert IBC transaction", timeoutHeight, timeoutTimestamp)
+		_, _ = waitForTXByEvents(
+			cmd,
+			sourceChain,
+			[]string{
+				fmt.Sprintf("timeout_packet.packet_sequence='%s'", packetSequence),
+				fmt.Sprintf("timeout_packet.packet_src_port='%s'", connection.ChannelA.Port),
+				fmt.Sprintf("timeout_packet.packet_src_channel='%s'", connection.ChannelA.Channel),
+				fmt.Sprintf("timeout_packet.packet_dst_port='%s'", connection.ChannelB.Port),
+				fmt.Sprintf("timeout_packet.packet_dst_channel='%s'", connection.ChannelB.Channel),
+			},
+			"Timeout/revert IBC transaction",
+			"Timeout/revert IBC transaction",
+			fmt.Sprintf("If the timeout message does not get relayed, you can relay it yourself with hermes using the following command:\n hermes tx packet-recv --dst-chain %s --src-chain %s --src-port %s --src-channel %s\n", destinationChain.ChainID(), sourceChain.ChainID(), connection.ChannelA.Port, connection.ChannelA.Channel),
+			0,
+			0,
+		)
 	}
 }

@@ -37,7 +37,7 @@ type Chain interface {
 	NFTImplementation() NFTImplementation
 
 	GetConnectionsTo(chain Chain) []NFTConnection
-	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
+	GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string, tryToForceTimeout bool) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64)
 
 	CreateIssueCreditClassMsg(denomID, denomName, schema, sender, symbol string, mintRestricted, updateRestricted bool, description, uri, uriHash, data string) sdk.Msg
 	CreateTransferNFTMsg(channel NFTChannel, class NFTClass, nft NFT, fromAddress string, toAddress string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) sdk.Msg
@@ -116,7 +116,7 @@ func (c ChainData) NFTImplementation() NFTImplementation {
 	return c.nftImplementation
 }
 
-func (c ChainData) GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64) {
+func (c ChainData) GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel string, tryToForceTimeout bool) (timeoutHeight clienttypes.Height, timeoutTimestamp uint64) {
 	timeoutTimestamp = nfttransfertypes.DefaultRelativePacketTimeoutTimestamp
 	timeoutHeight, err := clienttypes.ParseHeight(nfttransfertypes.DefaultRelativePacketTimeoutHeight)
 	if err != nil {
@@ -126,6 +126,13 @@ func (c ChainData) GetIBCTimeouts(clientCtx client.Context, srcPort, srcChannel 
 	consensusState, height, _, err := channelutils.QueryLatestConsensusState(clientCtx, srcPort, srcChannel)
 	if err != nil {
 		log.Fatalf("Error querying latest consensus state: %v", err)
+	}
+
+	if tryToForceTimeout {
+		return clienttypes.Height{
+			RevisionNumber: height.RevisionNumber,
+			RevisionHeight: height.RevisionHeight + 2,
+		}, 0
 	}
 
 	absoluteHeight := height

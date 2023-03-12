@@ -245,11 +245,11 @@ func sendTX(clientCtx client.Context, flagSet *pflag.FlagSet, msgs ...sdk.Msg) (
 	return res, nil
 }
 
-func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, txLabel string) *sdk.TxResponse {
+func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, shortTxLabel, txLabel string) *sdk.TxResponse {
 	clientCtx := getQueryClientContext(cmd, chain)
 
 	try := 1
-	maxTries := 50
+	maxTries := 100
 	for {
 		if try > maxTries {
 			panic(fmt.Errorf("%s (%s) on %s not found after %d tries", txLabel, txHash, chain.Label(), maxTries))
@@ -258,8 +258,8 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, txLabel st
 		txResp, err := authtx.QueryTx(clientCtx, txHash)
 		if err != nil {
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-			fmt.Printf("⬜ Waiting for %s (%s) on %s - attempt %d/%d", txLabel, txHash, chain.Label(), try, maxTries)
-			time.Sleep(1 * time.Second)
+			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", txLabel, chain.Label(), try, maxTries)
+			time.Sleep(2 * time.Second)
 			try++
 			continue
 		}
@@ -269,16 +269,16 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, txLabel st
 		}
 
 		fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-		fmt.Printf("✅ %s (%s on %s) successful!\n", txLabel, chain.Label(), txHash)
+		fmt.Printf("✅ %s (%s on %s) successful!\n", txLabel, txHash, chain.Label())
 		return txResp
 	}
 }
 
-func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, txLabel string, timeoutHeight uint64, timeoutTimestamp uint64) (tx *sdk.TxResponse, timeout bool) {
+func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, shortTxLabel, txLabel, longWaitMsg string, timeoutHeight uint64, timeoutTimestamp uint64) (tx *sdk.TxResponse, timeout bool) {
 	clientCtx := getQueryClientContext(cmd, chain)
 
 	try := 1
-	maxTries := 50
+	maxTries := 100
 	for {
 		if try > maxTries {
 			panic(fmt.Errorf("%s not found after %d tries", txLabel, maxTries))
@@ -301,8 +301,11 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 			}
 
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", txLabel, chain.Label(), try, maxTries)
-			time.Sleep(1 * time.Second)
+			if try >= 10 {
+				fmt.Printf("⏳ %s", longWaitMsg)
+			}
+			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", shortTxLabel, chain.Label(), try, maxTries)
+			time.Sleep(2 * time.Second)
 			try++
 			continue
 		case 1:
