@@ -12,6 +12,15 @@ The GON cli is a CLI for Game of NFTs. It can create classes/collections/denoms,
 | Uptick   | ❌            | ❌         | ✅                        | ✅          |
 | OmniFlix | ❌            | ❌         | ✅                        | ✅          |
 
+Extra helper tools and features:
+- ✅ IBC Transaction lookup
+- ✅ Key management
+- ✅ Multiline editor for NFT metadata
+- ✅ List GoN IBC Connections
+- ✅ Calculate Class Hash
+- ✅ Generate Class IBC trace (by choosing each hop)
+- ✅ Generate relay commands so that you can relay yourself with `rly` or `hermes` on the paths you need only
+
 ## Usage
 
 Simply run `gon` and follow the instructions:
