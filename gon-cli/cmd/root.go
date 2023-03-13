@@ -41,6 +41,9 @@ const (
 
 	toolsOption  OptionString = "Helper tools"
 	toolsCommand              = "tools"
+
+	gonToolsOption  OptionString = "GoN specific Tools"
+	gonToolsCommand              = "gon-tools"
 )
 
 func NewRootCmd(appHomeDir string) *cobra.Command {
@@ -101,6 +104,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				transferNFTOption,
 				queryNFTSOption,
 				toolsOption,
+				gonToolsOption,
 			}
 
 			var topLevelChoice OptionString
@@ -116,6 +120,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = queryNFTSOption
 				case toolsCommand:
 					topLevelChoice = toolsOption
+				case gonToolsCommand:
+					topLevelChoice = gonToolsOption
 				default:
 					panic("invalid command")
 				}
@@ -134,6 +140,9 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return queryNFTsInteractive(cmd)
 			case toolsOption:
 				toolsInteractive(cmd, args)
+				return nil
+			case gonToolsOption:
+				gonToolsInteractive(cmd, args)
 				return nil
 			default:
 				panic(topLevelChoice + " not implemented option")

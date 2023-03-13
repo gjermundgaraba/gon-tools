@@ -301,8 +301,8 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 			}
 
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-			if try >= 10 {
-				fmt.Printf("⏳ %s", longWaitMsg)
+			if try == 10 {
+				fmt.Printf("⏳ %s\n", longWaitMsg)
 			}
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", shortTxLabel, chain.Label(), try, maxTries)
 			time.Sleep(2 * time.Second)

@@ -75,5 +75,7 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 		generateTraceInteractive()
 	case relayerCommandsOption:
 		relayerCommandsInteractive()
+	default:
+		panic("invalid command")
 	}
 }
