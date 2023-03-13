@@ -53,7 +53,8 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 	chosenChannel := chosenConnection.ChannelA
 
 	tryToForceTimeout, _ := cmd.Flags().GetBool(flagTryToForceTimeout)
-	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(cmd, clientCtx, destinationChain, chosenChannel.Port, chosenChannel.Channel, tryToForceTimeout)
+	targetChainHeight, targetChainTimestamp := getCurrentChainStatus(cmd.Context(), getQueryClientContext(cmd, destinationChain))
+	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, chosenChannel.Port, chosenChannel.Channel, targetChainHeight, targetChainTimestamp, tryToForceTimeout)
 
 	msg := sourceChain.CreateTransferNFTMsg(chosenChannel, selectedClass, selectedNFT, fromAddress, destinationAddress, timeoutHeight, timeoutTimestamp)
 	if tryToForceTimeout {
