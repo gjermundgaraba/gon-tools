@@ -46,5 +46,9 @@ You just need to know source chain, destination chain and the tx hash of the tra
 
 ```bash
 $ gon
-
+? What would you like to do? Self Relay IBC message
+This command requires the go relayer to have been set up according to the documentation see self-relay.md
+? Source chain of transactions that needs relaying Stargaze GoN Testnet
+? Destination chain of transactions that needs relaying Juno GoN Testnet
+? Transaction hash to relay 690512AE975B86811C76C36F4416DD55CB5939826F79B529635153D27184302B
 ``` 
