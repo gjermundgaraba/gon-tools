@@ -26,6 +26,7 @@ import (
 
 const (
 	flagTryToForceTimeout = "try-to-timeout"
+	flagSelfRelay         = "self-relay"
 
 	createNFTClassOption  OptionString = "Create NFT Class"
 	createNFTClassCommand              = "create-class"
@@ -162,6 +163,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 
 	flags.AddTxFlagsToCmd(rootCmd)
 	rootCmd.Flags().Bool(flagTryToForceTimeout, false, "Try to force a timeout")
+	rootCmd.Flags().Bool(flagSelfRelay, false, "Relay transfer transactions yourself - requires go relayer config to be set up correctly")
 
 	return rootCmd
 }

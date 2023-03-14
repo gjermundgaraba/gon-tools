@@ -1,12 +1,15 @@
 package gorelayer
 
 import (
+	"context"
 	"fmt"
 	rlycmd "github.com/cosmos/relayer/v2/cmd"
 	"github.com/cosmos/relayer/v2/relayer"
+	"github.com/cosmos/relayer/v2/relayer/provider"
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 var pathMap = map[string]map[string]string{
@@ -79,8 +82,103 @@ type Rly struct {
 	Config   *rlycmd.Config
 }
 
-func (rly *Rly) GetRelayerChain(gonChain chains.Chain) *relayer.Chain {
-	chain, err := rly.Config.Chains.Get(string(gonChain.ChainID()))
+func (rly *Rly) RelayPacket(ctx context.Context, connection chains.NFTConnection, packetSequence uint64) bool {
+	src := rly.GetRelayerChain(string(connection.ChannelA.ChainID))
+	dst := rly.GetRelayerChain(string(connection.ChannelB.ChainID))
+
+	srch, dsth, err := relayer.QueryLatestHeights(ctx, src, dst)
+	if err != nil {
+		panic(err)
+	}
+
+	pathString := rly.GetPathString(connection)
+	//var path *relayer.Path
+	if _, err = rly.setPathsFromArgs(src, dst, pathString); err != nil {
+		panic(err)
+	}
+
+	srcChannel, err := relayer.QueryChannel(ctx, src, connection.ChannelA.Channel)
+	if err != nil {
+		panic(err)
+	}
+
+	eg, egCtx := errgroup.WithContext(ctx)
+	var msgsSrc1, msgsDst1 []provider.RelayerMessage
+	eg.Go(func() error {
+		// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
+		_ = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, src, dst, srch, dsth, &msgsSrc1, &msgsDst1,
+			srcChannel.ChannelId, srcChannel.PortId, srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.Ordering)
+		// TODO: Add some kind of verbose mode where this gets logged out at least
+		return nil
+	})
+
+	var msgsSrc2, msgsDst2 []provider.RelayerMessage
+	eg.Go(func() error {
+		// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
+		_ = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, dst, src, dsth, srch, &msgsDst2, &msgsSrc2,
+			srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.ChannelId, srcChannel.PortId, srcChannel.Ordering)
+		// TODO: Add some kind of verbose mode where this gets logged out at least
+		return nil
+	})
+
+	if err = eg.Wait(); err != nil {
+		panic(err)
+	}
+
+	msgs := &relayer.RelayMsgs{
+		Src: append(msgsSrc1, msgsSrc2...),
+		Dst: append(msgsDst1, msgsDst2...),
+	}
+
+	if !msgs.Ready() {
+		rly.Log.Info(
+			"No packets to relay",
+			zap.String("src_chain_id", src.ChainID()),
+			zap.String("src_port_id", srcChannel.PortId),
+			zap.String("dst_chain_id", dst.ChainID()),
+			zap.String("dst_port_id", srcChannel.Counterparty.PortId),
+		)
+		return false
+	}
+
+	if err := msgs.PrependMsgUpdateClient(ctx, src, dst, srch, dsth); err != nil {
+		panic(err)
+	}
+
+	// send messages to their respective chains
+	result := msgs.Send(ctx, rly.Log, relayer.AsRelayMsgSender(src), relayer.AsRelayMsgSender(dst), "self-relayed using the Game of NFTs CLI by @gjermundgaraba")
+	if err := result.Error(); err != nil {
+		if result.PartiallySent() {
+			rly.Log.Info(
+				"Partial success when relaying packets",
+				zap.String("src_chain_id", src.ChainID()),
+				zap.String("src_port_id", srcChannel.PortId),
+				zap.String("dst_chain_id", dst.ChainID()),
+				zap.String("dst_port_id", srcChannel.Counterparty.PortId),
+				zap.Error(err),
+			)
+		}
+		if err.Error() == "packet messages are redundant" {
+			return true
+		}
+
+		panic(err)
+	}
+
+	if result.SuccessfulSrcBatches > 0 {
+		return true
+		// TODO: PRINT SOMETHING
+	}
+	if result.SuccessfulDstBatches > 0 {
+		return true
+		// TODO: PRINT SOMETHING
+	}
+
+	return false
+}
+
+func (rly *Rly) GetRelayerChain(chainID string) *relayer.Chain {
+	chain, err := rly.Config.Chains.Get(chainID)
 	if err != nil {
 		panic(err)
 	}
@@ -97,6 +195,43 @@ func (rly *Rly) GetPathString(connection chains.NFTConnection) string {
 	return path
 }
 
-func (rly *Rly) GetPath() {
+func (rly *Rly) setPathsFromArgs(src, dst *relayer.Chain, name string) (*relayer.Path, error) {
+	// find any configured paths between the chains
+	paths, err := rly.Config.Paths.PathsFromChains(src.ChainID(), dst.ChainID())
+	if err != nil {
+		return nil, err
+	}
 
+	// Given the number of args and the number of paths, work on the appropriate
+	// path.
+	var path *relayer.Path
+	switch {
+	case name != "" && len(paths) > 1:
+		if path, err = paths.Get(name); err != nil {
+			return nil, err
+		}
+
+	case name != "" && len(paths) == 1:
+		if path, err = paths.Get(name); err != nil {
+			return nil, err
+		}
+
+	case name == "" && len(paths) > 1:
+		return nil, fmt.Errorf("more than one path between %s and %s exists, pass in path name", src.ChainID(), dst.ChainID())
+
+	case name == "" && len(paths) == 1:
+		for _, v := range paths {
+			path = v
+		}
+	}
+
+	if err := src.SetPath(path.End(src.ChainID())); err != nil {
+		return nil, err
+	}
+
+	if err := dst.SetPath(path.End(dst.ChainID())); err != nil {
+		return nil, err
+	}
+
+	return path, nil
 }

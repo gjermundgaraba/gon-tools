@@ -5,14 +5,49 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	"github.com/gjermundgaraba/gon/chains"
+	"github.com/gjermundgaraba/gon/gorelayer"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"strconv"
+	"time"
 )
 
-func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string) {
+func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool) {
 	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
 	connection := findConnection(txResp)
+	connection.ChannelA.ChainID = sourceChain.ChainID()
+	connection.ChannelB.ChainID = destinationChain.ChainID()
+
+	if selfRelay {
+		fmt.Println("Self relaying... (Note: this requires configuration according to the documentation in self-relay.md)")
+
+		relayed := false
+		maxTries := 15
+		for i := 0; i < maxTries; i++ {
+			// TODO: Have some kind of verbose option that uses a different logger
+			logger := zap.NewNop()
+			defer logger.Sync() // flushes buffer, if any
+			rly := gorelayer.InitRly(logger)
+
+			packetSequenceAsUint64, err := strconv.ParseUint(packetSequence, 10, 64)
+			if err != nil {
+				panic(err)
+			}
+			relayed = rly.RelayPacket(cmd.Context(), connection, packetSequenceAsUint64)
+			if relayed {
+				fmt.Println("Transfer seemingly self relayed (or successfully relayed by someone else, who knows!)")
+				break
+			} else {
+				time.Sleep(1 * time.Second)
+			}
+		}
+
+		if !relayed {
+			fmt.Println("Self relaying failed, this might be because the packet was already relayed by another relayer.")
+		}
+	}
+
 	timeoutHeight, timeoutTimestamp := findTimeouts(txResp)
 	waitForIBCPacket(cmd, sourceChain, destinationChain, connection, packetSequence, timeoutHeight, timeoutTimestamp)
 }

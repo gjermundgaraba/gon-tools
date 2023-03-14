@@ -79,7 +79,9 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 	}
 
 	fmt.Println()
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash)
+	selfRelay, _ := cmd.Flags().GetBool(flagSelfRelay)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, selfRelay)
+
 	fmt.Println()
 	fmt.Println("The destination ibc trace (full Class ID on destination chain):")
 	if isRewind {

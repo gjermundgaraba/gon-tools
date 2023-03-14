@@ -249,7 +249,7 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, shortTxLab
 	clientCtx := getQueryClientContext(cmd, chain)
 
 	try := 1
-	maxTries := 100
+	maxTries := 200
 	for {
 		if try > maxTries {
 			panic(fmt.Errorf("%s (%s) on %s not found after %d tries", txLabel, txHash, chain.Label(), maxTries))
@@ -259,7 +259,7 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, shortTxLab
 		if err != nil {
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", txLabel, chain.Label(), try, maxTries)
-			time.Sleep(2 * time.Second)
+			time.Sleep(500 * time.Millisecond)
 			try++
 			continue
 		}
@@ -308,12 +308,10 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 			time.Sleep(2 * time.Second)
 			try++
 			continue
-		case 1:
+		default:
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
 			fmt.Printf("✅ %s (%s on %s) successful!\n", txLabel, txsResult.Txs[0].TxHash, chain.Label())
 			return txsResult.Txs[0], false
-		default:
-			panic(fmt.Errorf("found more than one transaction with the same events"))
 		}
 	}
 }

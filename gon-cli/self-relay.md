@@ -1,10 +1,13 @@
 # Self relay
 
-There is a command in the GoN CLI that lets you relay your own transactions.
+There is a command, and a flag, in the GoN CLI that lets you relay your own transactions.
 
-For this to work, however, the go-relayer must be configured correctly.
+For this to work, however, there are a few things you need to do first. In particular, you need to configure the go-relayer.
+This is because the GoN CLI reuses a lot of the code from the go-relayer, and that includes configuration and key management - for now.
 
 ## Step 1: Install the go relayer
+
+(This step is only necessary because of the key management in step 2).
 
 Install the go relayer binary from here: https://github.com/cosmos/relayer
 
@@ -42,6 +45,17 @@ Or, use the config I have created for you that you can find at the bottom of thi
 If you changed the key name in step 2, you need to change the key name in the config file as well.
 
 ## Step 4: Use the GoN CLI to relay your own transactions
+
+### Option 1: Transfer with the `--self-relay` flag
+Simply start the gon cli using the `--self-relay` flag, and then use the `transfer` command as usual.
+
+```bash
+$ gon --self-relay
+? What would you like to do? Transfer NFT (Over IBC)
+etc...
+```
+
+### Option 2: Relay an existing, pending, IBC message
 
 You just need to know source chain, destination chain and the tx hash of the transaction you want to relay.
 

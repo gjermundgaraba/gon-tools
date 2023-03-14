@@ -30,7 +30,7 @@ var rlyPaths = []string{
 
 func relayerCommandsInteractive() {
 	sourceChain := chooseChain("Which chain is the source chain?")
-	destinationChain := chooseChain("Which chain is the destination chain?")
+	destinationChain := chooseChain("Which chain is the destination chain?", sourceChain)
 	connection := chooseConnection(sourceChain, destinationChain, "Which connection do you want to relay?")
 
 	rlySideA := fmt.Sprintf("%s_%s", sourceChain.ChainID(), connection.ChannelA.Channel)
