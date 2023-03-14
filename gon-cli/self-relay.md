@@ -58,6 +58,8 @@ This command requires the go relayer to have been set up according to the docume
 
 Provided as an example, and it works for me, so :shrug:
 
+This config also includes the now "defunct" channels between stargaze and juno, so if you need to relay between those, this config might be helpful.
+
 ```yaml
 global:
     api-listen-addr: :5183
