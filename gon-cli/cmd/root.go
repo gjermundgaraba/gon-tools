@@ -39,6 +39,9 @@ const (
 	transferNFTOption  OptionString = "Transfer NFT (Over IBC)"
 	transferNFTCommand              = "transfer"
 
+	selfRelayOption  OptionString = "Self Relay IBC message"
+	selfRelayCommand              = "self-relay"
+
 	toolsOption  OptionString = "Helper tools"
 	toolsCommand              = "tools"
 
@@ -103,6 +106,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				mintNFTOption,
 				transferNFTOption,
 				queryNFTSOption,
+				selfRelayOption,
 				toolsOption,
 				gonToolsOption,
 			}
@@ -118,6 +122,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = transferNFTOption
 				case queryNFTSCommand:
 					topLevelChoice = queryNFTSOption
+				case selfRelayCommand:
+					topLevelChoice = selfRelayOption
 				case toolsCommand:
 					topLevelChoice = toolsOption
 				case gonToolsCommand:
@@ -138,6 +144,9 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return transferNFTInteractive(cmd)
 			case queryNFTSOption:
 				return queryNFTsInteractive(cmd)
+			case selfRelayOption:
+				selfRelayInteractive(cmd)
+				return nil
 			case toolsOption:
 				toolsInteractive(cmd, args)
 				return nil

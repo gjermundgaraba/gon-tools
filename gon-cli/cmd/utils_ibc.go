@@ -9,14 +9,6 @@ import (
 	"strconv"
 )
 
-func findIBCTransactionsInteractive(cmd *cobra.Command) {
-	sourceChain := chooseChain("Choose the source chain")
-	destinationChain := chooseChain("Choose the destination chain")
-	intialTxHash := askForString("Enter the transaction hash of the initial transaction")
-
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, intialTxHash)
-}
-
 func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string) {
 	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
