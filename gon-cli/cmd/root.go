@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	omniflixnfttypes "github.com/OmniFlix/onft/types"
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
@@ -21,7 +23,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/strangelove-ventures/lens/client/codecs/ethermint"
 	tmcfg "github.com/tendermint/tendermint/config"
-	"os"
 )
 
 const (
@@ -42,6 +43,9 @@ const (
 
 	selfRelayOption  OptionString = "Self Relay IBC message"
 	selfRelayCommand              = "self-relay"
+
+	selfRelayDirectOption  OptionString = "Self Relay IBC message Direct"
+	selfRelayCommandDirect              = "self-relay-direct"
 
 	toolsOption  OptionString = "Helper tools"
 	toolsCommand              = "tools"
@@ -108,6 +112,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				transferNFTOption,
 				queryNFTSOption,
 				selfRelayOption,
+				selfRelayDirectOption,
 				toolsOption,
 				gonToolsOption,
 			}
@@ -125,6 +130,8 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = queryNFTSOption
 				case selfRelayCommand:
 					topLevelChoice = selfRelayOption
+				case selfRelayCommandDirect:
+					topLevelChoice = selfRelayDirectOption
 				case toolsCommand:
 					topLevelChoice = toolsOption
 				case gonToolsCommand:
@@ -147,6 +154,9 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				return queryNFTsInteractive(cmd)
 			case selfRelayOption:
 				selfRelayInteractive(cmd)
+				return nil
+			case selfRelayDirectOption:
+				selfRelay(cmd, args)
 				return nil
 			case toolsOption:
 				toolsInteractive(cmd, args)
