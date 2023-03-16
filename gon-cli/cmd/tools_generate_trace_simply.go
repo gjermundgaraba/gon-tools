@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"strings"
 
+	"regexp"
+
 	"github.com/AlecAivazis/survey/v2"
 )
 
+var cleanPath = regexp.MustCompile(`[^ijous12]+`)
+
 func generateTraceSimplyInteractive() {
 	className := askForString("Enter the original class name", survey.WithValidator(survey.Required))
-	simplyPath := askForString("Enter path (ie. i1j2u)", survey.WithValidator(survey.Required))
-
+	simplyPath := askForString("Enter path (ie. i1j2u or i --(1)--> j --(2)--> u)", survey.WithValidator(survey.Required))
+	simplyPath = cleanPath.ReplaceAllString(simplyPath, "")
 	simplyPath = pathReducer(simplyPath)
 	PORT_CHANNEL_MATRIX := getMatrix()
 	fullPath := ""
