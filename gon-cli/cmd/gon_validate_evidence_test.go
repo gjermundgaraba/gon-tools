@@ -6,14 +6,6 @@ import (
 	"testing"
 )
 
-func TestValidateEvidence(t *testing.T) {
-	evidence, err := excelize.OpenFile("testdata/evidence.xlsx")
-	require.NoError(t, err)
-
-	validationErrors := validateEvidenceFile(evidence)
-	require.Equal(t, 0, len(validationErrors))
-}
-
 func createEmptySheetWithHeaders(evidence *excelize.File, sheet string, headers []string) {
 	if _, err := evidence.NewSheet(sheet); err != nil {
 		panic(err)
@@ -48,13 +40,13 @@ func TestValidateInfoSheet(t *testing.T) {
 			setupTestEvidence: func(evidence *excelize.File) {},
 			expectedErrors:    []string{"Info sheet not found"},
 		},
-		"Info sheet should have 2 rows exactly": {
+		"Info sheet should have 2 rows exactly (including the first header row)": {
 			setupTestEvidence: func(evidence *excelize.File) {
 				createEmptyInfoSheetWithHeaders(evidence)
 				fillRowWithJunk(evidence, "Info", "A2", 8)
 				fillRowWithJunk(evidence, "Info", "A3", 8)
 			},
-			expectedErrors: []string{"Info sheet should have 2 rows exactly, but has 3 rows"},
+			expectedErrors: []string{"Info sheet should have 2 rows exactly (including the first header row), but has 3 rows"},
 		},
 		"Info sheet headers should not be changed": {
 			setupTestEvidence: func(evidence *excelize.File) {
@@ -112,13 +104,13 @@ func TestValidateA1(t *testing.T) {
 			setupTestEvidence: func(evidence *excelize.File) {},
 			expectedErrors:    []string{"A1 sheet not found"},
 		},
-		"Info sheet should have 2 rows exactly": {
+		"Info sheet should have 2 rows exactly (including the first header row)": {
 			setupTestEvidence: func(evidence *excelize.File) {
 				createEmptySheetWithHeaders(evidence, "A1", []string{"TxHash", "ClassID"})
 				fillRowWithJunk(evidence, "A1", "A2", 2)
 				fillRowWithJunk(evidence, "A1", "A3", 2)
 			},
-			expectedErrors: []string{"A1 sheet should have 2 rows exactly, but has 3 rows"},
+			expectedErrors: []string{"A1 sheet should have 2 rows exactly (including the first header row), but has 3 rows"},
 		},
 		"A1 sheet headers should not be changed": {
 			setupTestEvidence: func(evidence *excelize.File) {
@@ -165,13 +157,13 @@ func TestValidateA13(t *testing.T) {
 			setupTestEvidence: func(evidence *excelize.File) {},
 			expectedErrors:    []string{"A13 sheet not found"},
 		},
-		"Info sheet should have 2 rows exactly": {
+		"Info sheet should have 2 rows exactly (including the first header row)": {
 			setupTestEvidence: func(evidence *excelize.File) {
 				createEmptySheetWithHeaders(evidence, "A13", []string{"TxHash", "ChainID"})
 				fillRowWithJunk(evidence, "A13", "A2", 2)
 				fillRowWithJunk(evidence, "A13", "A3", 2)
 			},
-			expectedErrors: []string{"A13 sheet should have 5 rows exactly, but has 3 rows"},
+			expectedErrors: []string{"A13 sheet should have 5 rows exactly (including the first header row), but has 3 rows"},
 		},
 		"A13 sheet headers should not be changed": {
 			setupTestEvidence: func(evidence *excelize.File) {

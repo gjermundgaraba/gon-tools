@@ -338,7 +338,7 @@ func validateSheet(evidence *excelize.File, sheetName string, expectedNumberOfRo
 	}
 
 	if len(rows) != expectedNumberOfRows {
-		return append(validationErrors, fmt.Sprintf("%s sheet should have %d rows exactly, but has %d rows", sheetName, expectedNumberOfRows, len(rows)))
+		return append(validationErrors, fmt.Sprintf("%s sheet should have %d rows exactly (including the first header row), but has %d rows", sheetName, expectedNumberOfRows, len(rows)))
 	}
 
 	for i, header := range expectedHeaders {
