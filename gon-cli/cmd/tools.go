@@ -21,8 +21,8 @@ const (
 	generateTraceOption  OptionString = "Generate Trace manually"
 	generateTraceCommand              = "generate-trace"
 
-	generateTraceSimplyOption  OptionString = "Generate Trace Simply manually"
-	generateTraceSimplyCommand              = "generate-trace-simpy"
+	generateTraceFromFlowOption  OptionString = "Generate Trace manually from flow"
+	generateTraceFromFlowCommand              = "generate-trace-from-flow"
 )
 
 func toolsInteractive(cmd *cobra.Command, args []string) {
@@ -33,7 +33,7 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 		queryTransactionOption,
 		calculateClassHashOption,
 		generateTraceOption,
-		generateTraceSimplyOption,
+		generateTraceFromFlowOption,
 	}
 
 	var toolsChoice OptionString
@@ -51,8 +51,8 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 			toolsChoice = calculateClassHashOption
 		case generateTraceCommand:
 			toolsChoice = generateTraceOption
-		case generateTraceSimplyCommand:
-			toolsChoice = generateTraceSimplyOption
+		case generateTraceFromFlowCommand:
+			toolsChoice = generateTraceFromFlowOption
 		default:
 			panic("invalid command")
 		}
@@ -73,7 +73,7 @@ func toolsInteractive(cmd *cobra.Command, args []string) {
 		calculateClassHashInteractive()
 	case generateTraceOption:
 		generateTraceInteractive()
-	case generateTraceSimplyOption:
+	case generateTraceFromFlowOption:
 		generateTraceSimplyInteractive()
 	default:
 		panic("invalid command")
