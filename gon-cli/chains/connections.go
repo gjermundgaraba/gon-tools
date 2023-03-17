@@ -17,21 +17,6 @@ type NFTConnection struct {
 	ChannelB NFTChannel
 }
 
-func getConnectionsFor(chain Chain) []NFTConnection {
-	connections := []NFTConnection{}
-	for _, connection := range Connections {
-		if connection.ChannelA.ChainID == chain.ChainID() {
-			connections = append(connections, connection)
-		} else if connection.ChannelB.ChainID == chain.ChainID() {
-			connections = append(connections, NFTConnection{
-				ChannelA: connection.ChannelB,
-				ChannelB: connection.ChannelA,
-			})
-		}
-	}
-	return connections
-}
-
 // GetConnectionsTo returns all connections that have the given chain as the destination
 // The output will be ordered so that ChannelA is always the one on the source chain
 func (c ChainData) GetConnectionsTo(destinationChain Chain) []NFTConnection {

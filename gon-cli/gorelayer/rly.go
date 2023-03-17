@@ -165,16 +165,99 @@ func (rly *Rly) RelayPacket(ctx context.Context, connection chains.NFTConnection
 		panic(err)
 	}
 
-	if result.SuccessfulSrcBatches > 0 {
-		return true
-		// TODO: PRINT SOMETHING
-	}
-	if result.SuccessfulDstBatches > 0 {
-		return true
-		// TODO: PRINT SOMETHING
+	if acked := rly.RelayAcks(ctx, connection, packetSequence); acked {
+		fmt.Println("ACKs relayed successfully")
 	}
 
-	return false
+	return result.SuccessfulSrcBatches > 0 || result.SuccessfulDstBatches > 0
+}
+
+func (rly *Rly) RelayAcks(ctx context.Context, connection chains.NFTConnection, packetSequence uint64) bool {
+	src := rly.GetRelayerChain(string(connection.ChannelA.ChainID))
+	dst := rly.GetRelayerChain(string(connection.ChannelB.ChainID))
+	srch, dsth, err := relayer.QueryLatestHeights(ctx, src, dst)
+	if err != nil {
+		panic(err)
+	}
+
+	srcChannel, err := relayer.QueryChannel(ctx, src, connection.ChannelA.Channel)
+	if err != nil {
+		panic(err)
+	}
+
+	// set the maximum relay transaction constraints
+	msgs := &relayer.RelayMsgs{
+		Src: []provider.RelayerMessage{},
+		Dst: []provider.RelayerMessage{},
+	}
+
+	// add message for received packets on dst
+
+	// dst wrote the ack. acknowledgementFromSequence will query the acknowledgement
+	// from the counterparty chain (second chain provided in the arguments). The message
+	// should be sent to src.
+
+	// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
+	// TODO: Maybe print err in a verbose mode
+	relayAckMsgs, _ := src.ChainProvider.AcknowledgementFromSequence(ctx, dst.ChainProvider, uint64(dsth), packetSequence, srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.ChannelId, srcChannel.PortId)
+
+	// Do not allow nil messages to the queued, or else we will panic in send()
+	if relayAckMsgs != nil {
+		msgs.Src = append(msgs.Src, relayAckMsgs)
+	}
+
+	// add messages for received packets on src
+
+	// src wrote the ack. acknowledgementFromSequence will query the acknowledgement
+	// from the counterparty chain (second chain provided in the arguments). The message
+	// should be sent to dst.
+
+	// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
+	// TODO: Maybe print err in a verbose mode
+	relayAckMsgs, _ = dst.ChainProvider.AcknowledgementFromSequence(ctx, src.ChainProvider, uint64(srch), packetSequence, srcChannel.ChannelId, srcChannel.PortId, srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId)
+
+	// Do not allow nil messages to the queued, or else we will panic in send()
+	if relayAckMsgs != nil {
+		msgs.Dst = append(msgs.Dst, relayAckMsgs)
+	}
+
+	if !msgs.Ready() {
+		rly.Log.Info(
+			"No acknowledgements to relay",
+			zap.String("src_chain_id", src.ChainID()),
+			zap.String("src_port_id", srcChannel.PortId),
+			zap.String("dst_chain_id", dst.ChainID()),
+			zap.String("dst_port_id", srcChannel.Counterparty.PortId),
+		)
+		return false
+	}
+
+	if err := msgs.PrependMsgUpdateClient(ctx, src, dst, srch, dsth); err != nil {
+		panic(err)
+	}
+
+	// send messages to their respective chains
+	result := msgs.Send(ctx, rly.Log, relayer.AsRelayMsgSender(src), relayer.AsRelayMsgSender(dst), "self-acked using the Game of NFTs CLI by @gjermundgaraba")
+	if err := result.Error(); err != nil {
+		if result.PartiallySent() {
+			rly.Log.Info(
+				"Partial success when relaying acknowledgements",
+				zap.String("src_chain_id", src.ChainID()),
+				zap.String("src_port_id", srcChannel.PortId),
+				zap.String("dst_chain_id", dst.ChainID()),
+				zap.String("dst_port_id", srcChannel.Counterparty.PortId),
+				zap.Error(err),
+			)
+		}
+
+		if err.Error() == "packet messages are redundant" {
+			return true
+		}
+
+		panic(err)
+	}
+
+	return result.SuccessfulSrcBatches > 0 || result.SuccessfulDstBatches > 0
 }
 
 func (rly *Rly) GetRelayerChain(chainID string) *relayer.Chain {

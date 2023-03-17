@@ -164,3 +164,12 @@ var Chains = []Chain{
 	UptickChain,
 	OmniFlixChain,
 }
+
+func GetChainFromChainID(chainID ChainID) Chain {
+	for _, chain := range Chains {
+		if chain.ChainID() == chainID {
+			return chain
+		}
+	}
+	return nil
+}

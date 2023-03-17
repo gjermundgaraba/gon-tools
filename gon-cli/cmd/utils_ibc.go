@@ -23,7 +23,7 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 		fmt.Println("Self relaying... (Note: this requires configuration according to the documentation in self-relay.md)")
 
 		relayed := false
-		maxTries := 15
+		maxTries := 25
 		for i := 0; i < maxTries; i++ {
 			// TODO: Have some kind of verbose option that uses a different logger
 			logger := zap.NewNop()
@@ -39,7 +39,7 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 				fmt.Println("Transfer seemingly self relayed (or successfully relayed by someone else, who knows!)")
 				break
 			} else {
-				time.Sleep(1 * time.Second)
+				time.Sleep(500 * time.Millisecond)
 			}
 		}
 
@@ -157,6 +157,23 @@ func waitForIBCPacket(cmd *cobra.Command, sourceChain chains.Chain, destinationC
 			"Timeout/revert IBC transaction",
 			"Timeout/revert IBC transaction",
 			fmt.Sprintf("If the timeout message does not get relayed, you can relay it yourself with hermes using the following command:\n hermes tx packet-recv --dst-chain %s --src-chain %s --src-port %s --src-channel %s\n", destinationChain.ChainID(), sourceChain.ChainID(), connection.ChannelA.Port, connection.ChannelA.Channel),
+			0,
+			0,
+		)
+	} else {
+		_, _ = waitForTXByEvents(
+			cmd,
+			sourceChain,
+			[]string{
+				fmt.Sprintf("acknowledge_packet.packet_sequence='%s'", packetSequence),
+				fmt.Sprintf("acknowledge_packet.packet_src_port='%s'", connection.ChannelA.Port),
+				fmt.Sprintf("acknowledge_packet.packet_src_channel='%s'", connection.ChannelA.Channel),
+				fmt.Sprintf("acknowledge_packet.packet_dst_port='%s'", connection.ChannelB.Port),
+				fmt.Sprintf("acknowledge_packet.packet_dst_channel='%s'", connection.ChannelB.Channel),
+			},
+			"Aknowledge IBC transaction",
+			"Aknowledge IBC transaction",
+			"",
 			0,
 			0,
 		)

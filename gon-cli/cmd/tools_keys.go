@@ -261,14 +261,21 @@ func getKeyring(cdc codec.Codec) keyring.Keyring {
 	return kr
 }
 
-func getAddressForChain(clientCtx client.Context, chain chains.Chain, keyName string) string {
-	kr := getKeyring(clientCtx.Codec)
+func getCorrectedKeyName(originalKeyName string, chain chains.Chain) string {
+	correctedKeyName := originalKeyName
 	switch chain.KeyAlgo() {
 	case chains.KeyAlgoEthSecp256k1:
-		keyName = getEthermintKeyName(keyName)
+		correctedKeyName = getEthermintKeyName(originalKeyName)
 	case chains.KeyAlgoSecp256k1:
-		keyName = getDefaultKeyName(keyName)
+		correctedKeyName = getDefaultKeyName(originalKeyName)
 	}
+
+	return correctedKeyName
+}
+
+func getAddressForChain(clientCtx client.Context, chain chains.Chain, keyName string) string {
+	kr := getKeyring(clientCtx.Codec)
+	keyName = getCorrectedKeyName(keyName, chain)
 
 	record, err := kr.Key(keyName)
 	if err != nil {

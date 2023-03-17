@@ -3,8 +3,10 @@ package cmd
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/input"
@@ -12,6 +14,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/gjermundgaraba/gon/chains"
+	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"log"
@@ -19,6 +22,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	_ "unsafe"
 )
 
 var (
@@ -37,12 +42,27 @@ func idValidator(val interface{}) error {
 	return nil
 }
 
+// BEHOLD: THE UGLIEST HACK ALIVE!
+//
+//go:linkname accAddrCache github.com/cosmos/cosmos-sdk/types.accAddrCache
+var accAddrCache *simplelru.LRU
+
+//go:linkname consAddrCache github.com/cosmos/cosmos-sdk/types.consAddrCache
+var consAddrCache *simplelru.LRU
+
+//go:linkname valAddrCache github.com/cosmos/cosmos-sdk/types.valAddrCache
+var valAddrCache *simplelru.LRU
+
 func setAddressPrefixes(prefix string) {
 	accountPubKeyPrefix := prefix + "pub"
 	validatorAddressPrefix := prefix + "valoper"
 	validatorPubKeyPrefix := prefix + "valoperpub"
 	consNodeAddressPrefix := prefix + "valcons"
 	consNodePubKeyPrefix := prefix + "valconspub"
+
+	accAddrCache.Purge()
+	consAddrCache.Purge()
+	valAddrCache.Purge()
 
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount(prefix, accountPubKeyPrefix)
@@ -278,7 +298,7 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 	clientCtx := getQueryClientContext(cmd, chain)
 
 	try := 1
-	maxTries := 100
+	maxTries := 200
 	for {
 		if try > maxTries {
 			panic(fmt.Errorf("%s not found after %d tries", txLabel, maxTries))
@@ -301,11 +321,11 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 			}
 
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-			if try == 10 {
+			if try == 10 && longWaitMsg != "" {
 				fmt.Printf("⏳ %s\n", longWaitMsg)
 			}
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", shortTxLabel, chain.Label(), try, maxTries)
-			time.Sleep(2 * time.Second)
+			time.Sleep(500 * time.Millisecond)
 			try++
 			continue
 		default:
@@ -331,4 +351,65 @@ func calculateClassTrace(currentFullPathClassID string, connection chains.NFTCon
 	} else {
 		return fmt.Sprintf("%s/%s/%s", connection.ChannelB.Port, connection.ChannelB.Channel, currentFullPathClassID), false
 	}
+}
+
+func queryNftClassFromTrace(cmd *cobra.Command, fullPathClassID string, destinationChain chains.Chain) chains.NFTClass {
+	nft := chains.NFTClass{
+		ClassID:         fullPathClassID,
+		BaseClassID:     fullPathClassID,
+		FullPathClassID: fullPathClassID,
+	}
+
+	classSplit := strings.Split(fullPathClassID, "/")
+	if len(classSplit) > 2 {
+		if destinationChain.NFTImplementation() == chains.CosmosSDK {
+			nft.ClassID = calculateClassHash(fullPathClassID)
+		}
+
+		nft.BaseClassID = classSplit[len(classSplit)-1]
+
+		latestPort := classSplit[0]
+		latestChannel := classSplit[1]
+		nft.LastIBCChannel = chains.NFTChannel{
+			ChainID: "", // TODO: NOT SURE IF I NEED THIS OR NOT HERE
+			Port:    latestPort,
+			Channel: latestChannel,
+		}
+
+		if destinationChain.NFTImplementation() == chains.CosmWasm {
+			bridgerContract := strings.TrimPrefix(latestPort, "wasm.")
+			nftContractQueryData, err := chains.Decoder.DecodeString(fmt.Sprintf(`{"nft_contract": {"class_id" : "%s"}}`, nft.ClassID))
+			if err != nil {
+				panic(err)
+			}
+			clientCtx := getQueryClientContext(cmd, destinationChain)
+			wasmQueryClient := wasmdtypes.NewQueryClient(clientCtx)
+			queryContractByClassIDResponse, err := wasmQueryClient.SmartContractState(
+				cmd.Context(),
+				&wasmdtypes.QuerySmartContractStateRequest{
+					Address:   bridgerContract,
+					QueryData: nftContractQueryData,
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+			queryContractStringOutput, err := clientCtx.Codec.MarshalJSON(queryContractByClassIDResponse)
+			if err != nil {
+				panic(err)
+			}
+			var nftContractResponse queryNftContractResponse
+			if err := json.Unmarshal(queryContractStringOutput, &nftContractResponse); err != nil {
+				panic(err)
+			}
+			nftContract := nftContractResponse.Data
+			if nftContract == "" {
+				panic(err)
+			}
+
+			nft.Contract = nftContract
+		}
+	}
+
+	return nft
 }

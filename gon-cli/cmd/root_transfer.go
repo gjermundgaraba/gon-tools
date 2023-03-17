@@ -88,6 +88,5 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 		fmt.Println("(This is a rewind transaction)")
 	}
 	fmt.Println(expectedDestinationClass)
-
 	return nil
 }

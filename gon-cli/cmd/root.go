@@ -52,16 +52,7 @@ const (
 
 func NewRootCmd(appHomeDir string) *cobra.Command {
 	encodingConfig := makeEncodingConfig()
-	initClientCtx := client.Context{}.
-		WithCodec(encodingConfig.Codec).
-		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
-		WithTxConfig(encodingConfig.TxConfig).
-		WithLegacyAmino(encodingConfig.Amino).
-		WithInput(os.Stdin).
-		WithAccountRetriever(types.AccountRetriever{}).
-		WithHomeDir(appHomeDir).
-		WithViper("")
-
+	initClientCtx := getInitialClientCtx(appHomeDir)
 	rootCmd := &cobra.Command{
 		Use:   "gon [optional-command]",
 		Short: "Game of NFTs - made simple!",
@@ -75,31 +66,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 `, createNFTClassCommand, mintNFTCommand, queryNFTSCommand, transferNFTCommand, listConnectionsCommand),
 		Args: cobra.ArbitraryArgs,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-			// set the default command outputs
-			cmd.SetOut(cmd.OutOrStdout())
-			cmd.SetErr(cmd.ErrOrStderr())
-
-			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
-			if err != nil {
-				return err
-			}
-
-			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
-			if err != nil {
-				return err
-			}
-
-			// Overwrite here, because config.ReadFromClientConfig sets it...
-			initClientCtx = initClientCtx.WithKeyring(getKeyring(encodingConfig.Codec))
-
-			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
-				return err
-			}
-
-			customAppTemplate, customAppConfig := initAppConfig()
-			customTMConfig := tmcfg.DefaultConfig()
-
-			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
+			return persistentPreRun(cmd, initClientCtx, encodingConfig.Codec)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			topLevelOptions := []OptionString{
@@ -227,4 +194,46 @@ func makeEncodingConfig() EncodingConfig {
 		TxConfig:          txCfg,
 		Amino:             amino,
 	}
+}
+
+func getInitialClientCtx(appHomeDir string) client.Context {
+	encodingConfig := makeEncodingConfig()
+	return client.Context{}.
+		WithCodec(encodingConfig.Codec).
+		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
+		WithTxConfig(encodingConfig.TxConfig).
+		WithLegacyAmino(encodingConfig.Amino).
+		WithInput(os.Stdin).
+		WithAccountRetriever(types.AccountRetriever{}).
+		WithHomeDir(appHomeDir).
+		WithViper("")
+
+}
+
+func persistentPreRun(cmd *cobra.Command, initClientCtx client.Context, cdc codec.Codec) error {
+	// set the default command outputs
+	cmd.SetOut(cmd.OutOrStdout())
+	cmd.SetErr(cmd.ErrOrStderr())
+
+	initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
+	if err != nil {
+		return err
+	}
+
+	initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
+	if err != nil {
+		return err
+	}
+
+	// Overwrite here, because config.ReadFromClientConfig sets it...
+	initClientCtx = initClientCtx.WithKeyring(getKeyring(cdc))
+
+	if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
+		return err
+	}
+
+	customAppTemplate, customAppConfig := initAppConfig()
+	customTMConfig := tmcfg.DefaultConfig()
+
+	return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
 }

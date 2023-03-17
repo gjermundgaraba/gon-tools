@@ -10,7 +10,7 @@ func calculateClassHashInteractive() {
 	trace := askForString("Enter the full class ibc trace (this is not validated in any way)", survey.WithValidator(survey.Required))
 
 	fmt.Println("Class hash:")
-	fmt.Printf(calculateClassHash(trace))
+	fmt.Println(calculateClassHash(trace))
 }
 
 func calculateClassHash(trace string) string {
