@@ -159,10 +159,11 @@ func (rly *Rly) RelayPacket(ctx context.Context, connection chains.NFTConnection
 			)
 		}
 		if err.Error() == "packet messages are redundant" {
+			fmt.Println("Packet already relayed")
 			return true
 		}
 
-		panic(err)
+		fmt.Println("Something wrong happened when relaying packets", err)
 	}
 
 	if acked := rly.RelayAcks(ctx, connection, packetSequence); acked {

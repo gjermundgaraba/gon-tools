@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool) {
+func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool, verbose bool) {
 	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
 	connection := findConnection(txResp)
@@ -27,6 +27,14 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 		for i := 0; i < maxTries; i++ {
 			// TODO: Have some kind of verbose option that uses a different logger
 			logger := zap.NewNop()
+			if verbose {
+				var err error
+				logger, err = zap.NewDevelopment()
+				if err != nil {
+					panic(err)
+				}
+			}
+
 			defer logger.Sync() // flushes buffer, if any
 			rly := gorelayer.InitRly(logger)
 

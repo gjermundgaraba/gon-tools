@@ -28,6 +28,7 @@ import (
 const (
 	flagTryToForceTimeout = "try-to-timeout"
 	flagSelfRelay         = "self-relay"
+	flagVerbose           = "verbose"
 
 	createNFTClassOption  OptionString = "Create NFT Class"
 	createNFTClassCommand              = "create-class"
@@ -43,9 +44,6 @@ const (
 
 	selfRelayOption  OptionString = "Self Relay IBC message"
 	selfRelayCommand              = "self-relay"
-
-	selfRelayDirectOption  OptionString = "Self Relay IBC message Direct"
-	selfRelayCommandDirect              = "self-relay-direct"
 
 	toolsOption  OptionString = "Helper tools"
 	toolsCommand              = "tools"
@@ -79,7 +77,6 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 				transferNFTOption,
 				queryNFTSOption,
 				selfRelayOption,
-				selfRelayDirectOption,
 				toolsOption,
 				gonToolsOption,
 			}
@@ -97,8 +94,6 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 					topLevelChoice = queryNFTSOption
 				case selfRelayCommand:
 					topLevelChoice = selfRelayOption
-				case selfRelayCommandDirect:
-					topLevelChoice = selfRelayDirectOption
 				case toolsCommand:
 					topLevelChoice = toolsOption
 				case gonToolsCommand:
@@ -120,10 +115,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 			case queryNFTSOption:
 				return queryNFTsInteractive(cmd)
 			case selfRelayOption:
-				selfRelayInteractive(cmd)
-				return nil
-			case selfRelayDirectOption:
-				selfRelay(cmd, args)
+				selfRelayInteractive(cmd, args)
 				return nil
 			case toolsOption:
 				toolsInteractive(cmd, args)
@@ -141,6 +133,7 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 	flags.AddTxFlagsToCmd(rootCmd)
 	rootCmd.Flags().Bool(flagTryToForceTimeout, false, "Try to force a timeout")
 	rootCmd.Flags().Bool(flagSelfRelay, false, "Relay transfer transactions yourself - requires go relayer config to be set up correctly")
+	rootCmd.Flags().Bool(flagVerbose, false, "Say more")
 
 	return rootCmd
 }
