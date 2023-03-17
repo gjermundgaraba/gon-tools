@@ -25,7 +25,6 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 		relayed := false
 		maxTries := 25
 		for i := 0; i < maxTries; i++ {
-			// TODO: Have some kind of verbose option that uses a different logger
 			logger := zap.NewNop()
 			if verbose {
 				var err error

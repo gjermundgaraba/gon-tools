@@ -108,16 +108,16 @@ func (rly *Rly) RelayPacket(ctx context.Context, connection chains.NFTConnection
 		// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
 		_ = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, src, dst, srch, dsth, &msgsSrc1, &msgsDst1,
 			srcChannel.ChannelId, srcChannel.PortId, srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.Ordering)
-		// TODO: Add some kind of verbose mode where this gets logged out at least
+		rly.Log.Debug("Error from AddMessagesForSequences, msgsSrc1, msgsDst1", zap.String("src_chain_id", src.ChainID()), zap.String("dst_chain_id", dst.ChainID()), zap.Error(err))
 		return nil
 	})
 
 	var msgsSrc2, msgsDst2 []provider.RelayerMessage
 	eg.Go(func() error {
 		// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
-		_ = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, dst, src, dsth, srch, &msgsDst2, &msgsSrc2,
+		err = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, dst, src, dsth, srch, &msgsDst2, &msgsSrc2,
 			srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.ChannelId, srcChannel.PortId, srcChannel.Ordering)
-		// TODO: Add some kind of verbose mode where this gets logged out at least
+		rly.Log.Debug("Error from AddMessagesForSequences, msgsSrc2, msgsDst2", zap.String("src_chain_id", dst.ChainID()), zap.String("dst_chain_id", src.ChainID()), zap.Error(err))
 		return nil
 	})
 
