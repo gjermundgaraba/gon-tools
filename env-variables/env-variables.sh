@@ -84,14 +84,14 @@ OMNIFLIX_TO_IRIS_PORT_2="nft-transfer"
 OMNIFLIX_TO_IRIS_CHANNEL_2="channel-25"
 
 STARGAZE_TO_JUNO_PORT_1="wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh"
-STARGAZE_TO_JUNO_CHANNEL_1="channel-211"
+STARGAZE_TO_JUNO_CHANNEL_1="channel-230"
 JUNO_TO_STARGAZE_PORT_1="wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a"
-JUNO_TO_STARGAZE_CHANNEL_1="channel-93"
+JUNO_TO_STARGAZE_CHANNEL_1="channel-120"
 
 STARGAZE_TO_JUNO_PORT_2="wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh"
-STARGAZE_TO_JUNO_CHANNEL_2="channel-213"
+STARGAZE_TO_JUNO_CHANNEL_2="channel-234"
 JUNO_TO_STARGAZE_PORT_2="wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a"
-JUNO_TO_STARGAZE_CHANNEL_2="channel-94"
+JUNO_TO_STARGAZE_CHANNEL_2="channel-122"
 
 STARGAZE_TO_UPTICK_PORT_1="wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh"
 STARGAZE_TO_UPTICK_CHANNEL_1="channel-203"

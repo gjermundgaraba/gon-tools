@@ -11,7 +11,14 @@ This is because the GoN CLI reuses a lot of the code from the go-relayer, and th
 
 Install the go relayer binary from here: https://github.com/cosmos/relayer
 
-## Step 2: Add your GoN keys to the relayer
+## Step 2: Create the configuration file
+
+Set up your ~/.relayer/config/config.yaml according to this: https://github.com/game-of-nfts/gon-testnets/blob/main/doc/relayer-config.md#go-relayer.
+Or, use the config I have created for you that you can find at the bottom of this document.
+
+Take note of the name you use for the `key:` value. That will be required in step 3.
+
+## Step 3: Add your GoN keys to the relayer
 
 You can use the same keys that you use for the GoN CLI, or you can create new keys for the relayer (in which case you need to also fund those accounts using the faucet).
 
@@ -36,13 +43,6 @@ $ rly keys add gon-irishub-1 key-1
 # NOTICE THE --coin-type 60 flag in the next command!! 
 $ rly keys add uptick_7000-2 key-1 --coin-type 60
 ```
-
-## Step 3: Create the configuration file
-
-Set up your ~/.relayer/config/config.yaml according to this: https://github.com/game-of-nfts/gon-testnets/blob/main/doc/relayer-config.md#go-relayer.
-Or, use the config I have created for you that you can find at the bottom of this document.
-
-If you changed the key name in step 2, you need to change the key name in the config file as well.
 
 ## Step 4: Use the GoN CLI to relay your own transactions
 
