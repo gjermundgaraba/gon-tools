@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gjermundgaraba/gon/chains"
-	"github.com/gjermundgaraba/gon/gorelayer"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 type Filter struct {
@@ -33,12 +31,6 @@ func selfRelayInteractive(cmd *cobra.Command) {
 }
 
 func selfRelay(cmd *cobra.Command, args []string) {
-	ctx := cmd.Context()
-
-	logger, _ := zap.NewProduction()
-	defer logger.Sync() // flushes buffer, if any
-	rly := gorelayer.InitRly(logger)
-
 	sourceChainID := args[1]
 	destinationChainID := args[2]
 	txHash := args[3]
