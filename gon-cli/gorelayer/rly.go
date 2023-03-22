@@ -44,6 +44,7 @@ var pathMap = map[string]map[string]string{
 		"channel-94":  "uni-6_channel-94-elgafar-1_channel-213",
 		"channel-120": "uni-6_channel-120-elgafar-1_channel-230",
 		"channel-122": "uni-6_channel-122-elgafar-1_channel-234",
+		"channel-133": "uni-6_elgafar-1_spam_test",
 	},
 	"uptick_7000-2": {
 		"channel-3":  "gon-irishub-1_channel-17-uptick_7000-2_channel-3",
@@ -66,6 +67,7 @@ var pathMap = map[string]map[string]string{
 		"channel-213": "uni-6_channel-94-elgafar-1_channel-213",
 		"channel-230": "uni-6_channel-120-elgafar-1_channel-230",
 		"channel-234": "uni-6_channel-122-elgafar-1_channel-234",
+		"channel-241": "uni-6_elgafar-1_spam_test",
 	},
 }
 

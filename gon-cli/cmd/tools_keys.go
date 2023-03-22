@@ -48,7 +48,7 @@ func chooseOrCreateKey(cmd *cobra.Command, chain chains.Chain) string {
 	var keyName string
 	if len(records) == 0 {
 		fmt.Println("No keys found, creating new key...")
-		keyName = createKey(kr)
+		keyName = createKeyInteractive(kr)
 	} else {
 		keyName = chooseKeyName(records)
 	}
@@ -70,7 +70,7 @@ func manageKeys(cmd *cobra.Command) {
 
 	switch action {
 	case keyOptionCreate:
-		_ = createKey(clientCtx.Keyring)
+		_ = createKeyInteractive(clientCtx.Keyring)
 	case keyOptionList:
 		listKeys(clientCtx.Keyring)
 	case keyOptionDelete:
@@ -78,10 +78,9 @@ func manageKeys(cmd *cobra.Command) {
 	}
 }
 
-func createKey(kr keyring.Keyring) string {
+func createKeyInteractive(kr keyring.Keyring) string {
 	keyName := askForString("Key name", survey.WithValidator(survey.Required))
-	keyNameEthermint := getEthermintKeyName(keyName)
-	restore := askForConfirmation("Recover from mnemonic?")
+	restore := askForConfirmation("Recover from mnemonic?", true)
 
 	var mnemonic string
 	var err error
@@ -97,6 +96,16 @@ func createKey(kr keyring.Keyring) string {
 		}
 	}
 
+	record := createKey(kr, keyName, mnemonic)
+
+	fmt.Printf("Key %q created successfully for default algo and ethermint (like evmos/uptick)\n", keyName)
+	fmt.Println()
+	printAddressesForKey(kr, record)
+
+	return keyName
+}
+
+func createKey(kr keyring.Keyring, keyName, mnemonic string) *keyring.Record {
 	defaultAlgo := keyring.SignatureAlgo(hd.Secp256k1)
 	record, err := kr.NewAccount(keyName, mnemonic, "", hd.CreateHDPath(defaultCoinType, 0, 0).String(), defaultAlgo)
 	if err != nil {
@@ -104,20 +113,13 @@ func createKey(kr keyring.Keyring) string {
 	}
 
 	ethermintAlgo := keyring.SignatureAlgo(ethermint.EthSecp256k1)
+	keyNameEthermint := getEthermintKeyName(keyName)
 	_, err = kr.NewAccount(keyNameEthermint, mnemonic, "", hd.CreateHDPath(ethermintCoinType, 0, 0).String(), ethermintAlgo)
 	if err != nil {
 		panic(err)
 	}
 
-	if !restore {
-		fmt.Println("Mnemonic (write it down, it won't show again!) 🔑:", mnemonic)
-	}
-
-	fmt.Printf("Key %q created successfully for default algo and ethermint (like evmos/uptick)\n", keyName)
-	fmt.Println()
-	printAddressesForKey(kr, record)
-
-	return keyName
+	return record
 }
 
 func getDefaultKeyName(keyName string) string {
@@ -244,9 +246,11 @@ func chooseKeyName(records []*keyring.Record) string {
 	// filter out ethermint keys
 	var walletOptions []OptionString
 	for _, record := range records {
-		if !strings.HasSuffix(record.Name, ethermintKeyNameSuffix) {
-			walletOptions = append(walletOptions, OptionString(record.Name))
+		if strings.HasSuffix(record.Name, ethermintKeyNameSuffix) {
+			continue
 		}
+
+		walletOptions = append(walletOptions, OptionString(record.Name))
 	}
 
 	return string(chooseOne("Choose wallet", walletOptions))

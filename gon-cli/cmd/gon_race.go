@@ -771,6 +771,24 @@ func raceInteractive(cmd *cobra.Command) {
 	flow := raceFlows[nftData.Flow]
 	fmt.Println("Selected flow:", flow.FlowName)
 	fmt.Println("Raw flow:", flow.FlowRaw)
+	finalClass := runFlow(cmd, key, flow, selectedClass, selectedNFT)
+
+	setAddressPrefixes(iris.Bech32Prefix())
+	irisTxClientCtx := getClientTxContext(cmd, iris).
+		WithSkipConfirmation(true)
+
+	msgTransferNFT := irisnfttypes.NewMsgTransferNFT(selectedNFT.ID, finalClass.ClassID, "[do-not-modify]", "[do-not-modify]", "[do-not-modify]", "[do-not-modify]", irisAddress, nftData.LastOwner)
+	fmt.Println("Message to be sent:")
+	_ = irisTxClientCtx.PrintProto(msgTransferNFT)
+	txResponse, err := sendTX(irisTxClientCtx, cmd.Flags(), msgTransferNFT)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Tx hash of final transfer message (before success):", txResponse.TxHash)
+	waitForTX(cmd, iris, txResponse.TxHash, "Final transfer to last_owner", "Final transfer to last_owner")
+}
+
+func runFlow(cmd *cobra.Command, key string, flow raceFlow, selectedClass chains.NFTClass, selectedNFT chains.NFT) chains.NFTClass {
 	currentClass := selectedClass
 	for _, conn := range flow.Path {
 		fmt.Println()
@@ -780,22 +798,10 @@ func raceInteractive(cmd *cobra.Command) {
 		sourceChain := chains.GetChainFromChainID(conn.ChannelA.ChainID)
 		destinationChain := chains.GetChainFromChainID(conn.ChannelB.ChainID)
 		currentClass = transferNFT(cmd, key, sourceChain, destinationChain, conn, currentClass, selectedNFT)
-		time.Sleep(5 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 
-	setAddressPrefixes(iris.Bech32Prefix())
-	irisTxClientCtx := getClientTxContext(cmd, iris).
-		WithSkipConfirmation(true)
-
-	msgTransferNFT := irisnfttypes.NewMsgTransferNFT(selectedNFT.ID, currentClass.ClassID, "[do-not-modify]", "[do-not-modify]", "[do-not-modify]", "[do-not-modify]", irisAddress, nftData.LastOwner)
-	fmt.Println("Message to be sent:")
-	_ = irisTxClientCtx.PrintProto(msgTransferNFT)
-	txResponse, err := sendTX(irisTxClientCtx, cmd.Flags(), msgTransferNFT)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Tx hash of final transfer message (before success):", txResponse.TxHash)
-	waitForTX(cmd, iris, txResponse.TxHash, "Final transfer to last_owner", "Final transfer to last_owner")
+	return currentClass
 }
 
 func transferNFT(cmd *cobra.Command, keyName string, sourceChain, destinationChain chains.Chain, connection chains.NFTConnection, class chains.NFTClass, nft chains.NFT) chains.NFTClass {
@@ -831,7 +837,7 @@ func transferNFT(cmd *cobra.Command, keyName string, sourceChain, destinationCha
 	if err != nil {
 		panic(err)
 	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, true, verbose)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, false, verbose, false)
 
 	return queryNftClassFromTrace(cmd, expectedDestinationTrace, destinationChain)
 }

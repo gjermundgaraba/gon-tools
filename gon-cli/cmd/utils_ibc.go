@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool, verbose bool) {
+func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool, verbose bool, waitForAck bool) {
 	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
 	connection := findConnection(txResp)
@@ -46,7 +46,7 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 				fmt.Println("Transfer seemingly self relayed (or successfully relayed by someone else, who knows!)")
 				break
 			} else {
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(250 * time.Millisecond)
 			}
 		}
 
@@ -56,7 +56,7 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 	}
 
 	timeoutHeight, timeoutTimestamp := findTimeouts(txResp)
-	waitForIBCPacket(cmd, sourceChain, destinationChain, connection, packetSequence, timeoutHeight, timeoutTimestamp)
+	waitForIBCPacket(cmd, sourceChain, destinationChain, connection, packetSequence, timeoutHeight, timeoutTimestamp, waitForAck)
 }
 
 func findPacketSequence(txResp *sdk.TxResponse) string {
@@ -131,7 +131,7 @@ func findTimeouts(txResp *sdk.TxResponse) (timeoutHeight uint64, timeoutTimestam
 	return timeoutHeight, timeoutTimestamp
 }
 
-func waitForIBCPacket(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, connection chains.NFTConnection, packetSequence string, timeoutHeight uint64, timeoutTimestamp uint64) {
+func waitForIBCPacket(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, connection chains.NFTConnection, packetSequence string, timeoutHeight uint64, timeoutTimestamp uint64, waitForAck bool) {
 	_, timeout := waitForTXByEvents(
 		cmd,
 		destinationChain,
@@ -167,7 +167,10 @@ func waitForIBCPacket(cmd *cobra.Command, sourceChain chains.Chain, destinationC
 			0,
 			0,
 		)
-	} else {
+		return
+	}
+
+	if waitForAck {
 		_, _ = waitForTXByEvents(
 			cmd,
 			sourceChain,

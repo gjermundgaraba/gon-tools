@@ -19,7 +19,11 @@ Extra helper tools and features:
 - ✅ List GoN IBC Connections
 - ✅ Calculate Class Hash
 - ✅ Generate Class IBC trace (by choosing each hop)
+- ✅ Generate Class IBC trace (by writing the flow, ie. i1j2u or i --(1)--> j --(2)--> u)
 - ✅ Generate relay commands so that you can relay yourself with `rly` or `hermes` on the paths you need only
+- ✅ Validate GoN evidence sheet
+- ✅ Run the GoN race (if you have an NFT set up with the correct data)
+- ✅ Test your NFT knowledge with the GoN quiz!
 
 ## Usage
 

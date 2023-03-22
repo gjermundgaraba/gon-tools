@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"os"
 
 	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
@@ -176,6 +177,9 @@ func makeEncodingConfig() EncodingConfig {
 
 	ibctypes.RegisterInterfaces(interfaceRegistry)
 	nfttransfertypes.RegisterInterfaces(interfaceRegistry)
+
+	banktypes.RegisterInterfaces(interfaceRegistry)
+	banktypes.RegisterLegacyAminoCodec(amino)
 
 	authtypes.RegisterInterfaces(interfaceRegistry)
 	authtypes.RegisterLegacyAminoCodec(amino)

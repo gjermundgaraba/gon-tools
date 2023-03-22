@@ -53,7 +53,7 @@ func selfRelayInteractive(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		fmt.Println("This command requires the go relayer to have been set up according to the documentation see self-relay.md")
-		youSure := askForConfirmation("This is currently an experimental feature, are you sure you want to continue?")
+		youSure := askForConfirmation("This is currently an experimental feature, are you sure you want to continue?", true)
 		if !youSure {
 			fmt.Println("Alight! See you later :*")
 			return
@@ -69,7 +69,7 @@ func selfRelayInteractive(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txHash, true, verbose)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txHash, true, verbose, true)
 
 	fmt.Println()
 	fmt.Println("Relay seemingly successful!")

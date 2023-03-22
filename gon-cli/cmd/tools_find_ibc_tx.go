@@ -11,5 +11,5 @@ func findIBCTransactionsInteractive(cmd *cobra.Command) {
 	if err != nil {
 		panic(err)
 	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, intialTxHash, false, verbose)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, intialTxHash, false, verbose, true)
 }

@@ -84,7 +84,7 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 	if err != nil {
 		panic(err)
 	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, selfRelay, verbose)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, selfRelay, verbose, true)
 
 	fmt.Println()
 	fmt.Println("The destination ibc trace (full Class ID on destination chain):")

@@ -29,12 +29,12 @@ func validateEvidenceFileInteractive() {
 
 	errors := validateEvidenceFile(evidence)
 	errorsFound := false
-	for sheet, sheetErrors := range errors {
-		if len(sheetErrors) > 0 {
+	for _, sheetErrors := range errors {
+		if len(sheetErrors.errors) > 0 {
 			errorsFound = true
 			fmt.Println()
-			fmt.Println("Errors in sheet", sheet)
-			for _, sheetError := range sheetErrors {
+			fmt.Println("Errors in sheet", sheetErrors.sheetName)
+			for _, sheetError := range sheetErrors.errors {
 				fmt.Println(sheetError)
 			}
 		}
@@ -46,30 +46,116 @@ func validateEvidenceFileInteractive() {
 	}
 }
 
-func validateEvidenceFile(evidence *excelize.File) (validationErrors map[string][]string) {
-	validationErrors = make(map[string][]string)
+type sheetValidationErrors struct {
+	sheetName string
+	errors    []string
+}
 
-	validationErrors["Info"] = validateInfoSheet(evidence)
-	validationErrors["A1"] = validateA1Sheet(evidence)
-	validationErrors["A2"] = validateA2Sheet(evidence)
-	validationErrors["A3"] = validateA3Sheet(evidence)
-	validationErrors["A4"] = validateA4Sheet(evidence)
-	validationErrors["A5"] = validateA5Sheet(evidence)
-	validationErrors["A6"] = validateA6Sheet(evidence)
-	validationErrors["A7"] = validateA7Sheet(evidence)
-	validationErrors["A8"] = validateA8Sheet(evidence)
-	validationErrors["A9"] = validateA9Sheet(evidence)
-	validationErrors["A10"] = validateA10Sheet(evidence)
-	validationErrors["A11"] = validateA11Sheet(evidence)
-	validationErrors["A12"] = validateA12Sheet(evidence)
-	validationErrors["A13"] = validateA13Sheet(evidence)
-	validationErrors["A14"] = validateA14Sheet(evidence)
-	validationErrors["A15"] = validateA15Sheet(evidence)
-	validationErrors["A16"] = validateA16Sheet(evidence)
-	validationErrors["A17"] = validateA17Sheet(evidence)
-	validationErrors["A18"] = validateA18Sheet(evidence)
-	validationErrors["A19"] = validateA19Sheet(evidence)
-	validationErrors["A20"] = validateA20Sheet(evidence)
+func validateEvidenceFile(evidence *excelize.File) (validationErrors []sheetValidationErrors) {
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "Info",
+		errors:    validateInfoSheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A1",
+		errors:    validateA1Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A2",
+		errors:    validateA2Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A3",
+		errors:    validateA3Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A4",
+		errors:    validateA4Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A5",
+		errors:    validateA5Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A6",
+		errors:    validateA6Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A7",
+		errors:    validateA7Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A8",
+		errors:    validateA8Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A9",
+		errors:    validateA9Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A10",
+		errors:    validateA10Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A11",
+		errors:    validateA11Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A12",
+		errors:    validateA12Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A13",
+		errors:    validateA13Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A14",
+		errors:    validateA14Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A15",
+		errors:    validateA15Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A16",
+		errors:    validateA16Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A17",
+		errors:    validateA17Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A18",
+		errors:    validateA18Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A19",
+		errors:    validateA19Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "A20",
+		errors:    validateA20Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "B1",
+		errors:    validateA20Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "B2",
+		errors:    validateA20Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "B5",
+		errors:    validateA20Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "B6",
+		errors:    validateA20Sheet(evidence),
+	})
+	validationErrors = append(validationErrors, sheetValidationErrors{
+		sheetName: "B7",
+		errors:    validateA20Sheet(evidence),
+	})
 
 	return validationErrors
 }
@@ -279,6 +365,51 @@ func validateA19Sheet(evidence *excelize.File) (validationErrors []string) {
 // - input from `row 2`
 func validateA20Sheet(evidence *excelize.File) (validationErrors []string) {
 	return validateSheetWithFlow13to20(evidence, "A20", []string{"TxHash", "ChainID"}, true, "i --(1)--> u --(1)--> s --(1)--> o --(1)--> s --(1)--> u --(1)--> i")
+}
+
+// ## B1
+//
+// - `sheet name` is unmodified
+// - `row length` == 3
+// - input from `row 2`
+func validateB1Sheet(evidence *excelize.File) (validationErrors []string) {
+	return validateSheet(evidence, "B1", 3, []string{"TxHash"}, true)
+}
+
+// ## B2
+//
+// - `sheet name` is unmodified
+// - `row length` == 3
+// - input from `row 2`
+func validateB2Sheet(evidence *excelize.File) (validationErrors []string) {
+	return validateSheet(evidence, "B2", 3, []string{"TxHash"}, true)
+}
+
+// ## B5
+//
+// - `sheet name` is unmodified
+// - `row length` == 3
+// - input from `row 2`
+func validateB5Sheet(evidence *excelize.File) (validationErrors []string) {
+	return validateSheet(evidence, "B5", 3, []string{"TxHash"}, true)
+}
+
+// ## B6
+//
+// - `sheet name` is unmodified
+// - `row length` == 3
+// - input from `row 2`
+func validateB6Sheet(evidence *excelize.File) (validationErrors []string) {
+	return validateSheet(evidence, "B6", 3, []string{"TxHash"}, true)
+}
+
+// ## B7
+//
+// - `sheet name` is unmodified
+// - `row length` == 3
+// - input from `row 2`
+func validateB7Sheet(evidence *excelize.File) (validationErrors []string) {
+	return validateSheet(evidence, "B7", 3, []string{"TxHash"}, true)
 }
 
 func validateSheetWithFlow13to20(evidence *excelize.File, sheetName string, expectedHeaders []string, allFieldsMandatory bool, flow string) (validationErrors []string) {

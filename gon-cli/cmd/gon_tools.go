@@ -8,12 +8,16 @@ const (
 
 	raceOption  OptionString = "Race"
 	raceCommand              = "race"
+
+	quizOption  OptionString = "Quiz"
+	quizCommand              = "quiz"
 )
 
 func gonToolsInteractive(cmd *cobra.Command, args []string) {
 	toolsOptions := []OptionString{
 		validateEvidenceFileOption,
 		raceOption,
+		quizOption,
 	}
 
 	var toolsChoice OptionString
@@ -23,6 +27,8 @@ func gonToolsInteractive(cmd *cobra.Command, args []string) {
 			toolsChoice = validateEvidenceFileOption
 		case raceCommand:
 			toolsChoice = raceOption
+		case quizCommand:
+			toolsChoice = quizOption
 		default:
 			panic("invalid command")
 		}
@@ -35,6 +41,8 @@ func gonToolsInteractive(cmd *cobra.Command, args []string) {
 		validateEvidenceFileInteractive()
 	case raceOption:
 		raceInteractive(cmd)
+	case quizOption:
+		gonQuizInteractive()
 	default:
 		panic("invalid command")
 	}

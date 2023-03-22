@@ -19,7 +19,7 @@ func generateTraceInteractive() {
 
 		currentChain = destinationChain
 
-		if anotherHop := askForConfirmation("Add another hop?"); anotherHop {
+		if anotherHop := askForConfirmation("Add another hop?", true); anotherHop {
 			continue
 		}
 		break

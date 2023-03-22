@@ -114,9 +114,9 @@ func askForString(question string, opts ...survey.AskOpt) (answer string) {
 	return
 }
 
-func askForConfirmation(question string) bool {
+func askForConfirmation(question string, defaultToYes bool) bool {
 	var answer bool
-	if err := survey.AskOne(&survey.Confirm{Message: question}, &answer); err != nil {
+	if err := survey.AskOne(&survey.Confirm{Message: question, Default: defaultToYes}, &answer); err != nil {
 		panic(err)
 	}
 
@@ -262,6 +262,10 @@ func sendTX(clientCtx client.Context, flagSet *pflag.FlagSet, msgs ...sdk.Msg) (
 		return nil, err
 	}
 
+	if res.Code != 0 {
+		return nil, fmt.Errorf(res.RawLog)
+	}
+
 	return res, nil
 }
 
@@ -279,7 +283,7 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, shortTxLab
 		if err != nil {
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", txLabel, chain.Label(), try, maxTries)
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(250 * time.Millisecond)
 			try++
 			continue
 		}
@@ -325,7 +329,7 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 				fmt.Printf("⏳ %s\n", longWaitMsg)
 			}
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", shortTxLabel, chain.Label(), try, maxTries)
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(250 * time.Millisecond)
 			try++
 			continue
 		default:

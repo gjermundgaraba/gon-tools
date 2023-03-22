@@ -186,6 +186,18 @@ var Connections = []NFTConnection{
 		ChannelA: NFTChannel{
 			ChainID: StargazeChain.chainID,
 			Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
+			Channel: "channel-241",
+		},
+		ChannelB: NFTChannel{
+			ChainID: JunoChain.chainID,
+			Port:    "wasm.juno1stv6sk0mvku34fj2mqrlyru6683866n306mfv52tlugtl322zmks26kg7a",
+			Channel: "channel-133",
+		},
+	},
+	{
+		ChannelA: NFTChannel{
+			ChainID: StargazeChain.chainID,
+			Port:    "wasm.stars1ve46fjrhcrum94c7d8yc2wsdz8cpuw73503e8qn9r44spr6dw0lsvmvtqh",
 			Channel: "channel-203",
 		},
 		ChannelB: NFTChannel{
