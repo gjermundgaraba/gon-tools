@@ -18,8 +18,7 @@ func mintNFTInteractive(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientTxContext(cmd, chain)
-	fromAddress := getAddressForChain(clientCtx, chain, key)
+	fromAddress := getAddressForChain(cmd, chain, key)
 
 	classID := askForString("Class ID", survey.WithValidator(idValidator))
 
@@ -43,5 +42,7 @@ func mintNFTInteractive(cmd *cobra.Command) error {
 	}
 
 	msg := chain.CreateMintNFTMsg(nftID, classID, name, uri, uriHash, data, fromAddress)
+
+	clientCtx := getClientTxContext(cmd, chain)
 	return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 }

@@ -32,9 +32,9 @@ func queryNFTsInteractive(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientTxContext(cmd, chain)
-	fromAddress := getAddressForChain(clientCtx, chain, key)
+	fromAddress := getAddressForChain(cmd, chain, key)
 
+	clientCtx := getClientTxContext(cmd, chain)
 	class := getUsersNfts(cmd.Context(), clientCtx, chain, fromAddress)
 	fmt.Printf("Class ID: %s \n", class.ClassID)
 	fmt.Printf("Base class ID: %s \n", class.BaseClassID)

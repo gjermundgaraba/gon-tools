@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/gjermundgaraba/gon/gorelayer"
 	"log"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func transferNFTInteractive(cmd *cobra.Command) error {
+func transferNFTInteractive(cmd *cobra.Command, appHomeDir string) error {
 	sourceChain := chooseChain("Select source chain")
 	setAddressPrefixes(sourceChain.Bech32Prefix())
 
@@ -20,12 +21,12 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientTxContext(cmd, sourceChain)
-	fromAddress := getAddressForChain(clientCtx, sourceChain, key)
+	fromAddress := getAddressForChain(cmd, sourceChain, key)
 
 	destinationChain := chooseChain("Select destination chain", sourceChain)
 	_ = destinationChain
 
+	clientCtx := getClientTxContext(cmd, sourceChain)
 	selectedClass := getUsersNfts(cmd.Context(), clientCtx, sourceChain, fromAddress)
 	if len(selectedClass.NFTs) == 0 {
 		fmt.Println("No NFT classes found")
@@ -41,7 +42,7 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 		log.Fatalf("Error getting destination address: %v", err)
 	}
 	if destinationAddress == "" {
-		destinationAddress = getAddressForChain(clientCtx, destinationChain, key)
+		destinationAddress = getAddressForChain(cmd, destinationChain, key)
 		fmt.Println("Destination address:", destinationAddress)
 	}
 
@@ -80,11 +81,16 @@ func transferNFTInteractive(cmd *cobra.Command) error {
 
 	fmt.Println()
 	selfRelay, _ := cmd.Flags().GetBool(flagSelfRelay)
-	verbose, err := cmd.Flags().GetBool(flagVerbose)
-	if err != nil {
-		panic(err)
+	var rly *gorelayer.Rly
+	if selfRelay {
+		verbose, _ := cmd.Flags().GetBool(flagVerbose)
+		kr := getKeyring(cmd)
+		regularKeyName := getDefaultKeyName(key)
+		ethKeyName := getEthermintKeyName(key)
+		rly = gorelayer.InitRly(appHomeDir, regularKeyName, ethKeyName, kr, verbose)
 	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, selfRelay, verbose, true)
+
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, rly, true)
 
 	fmt.Println()
 	fmt.Println("The destination ibc trace (full Class ID on destination chain):")

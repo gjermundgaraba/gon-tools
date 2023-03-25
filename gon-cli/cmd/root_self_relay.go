@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gjermundgaraba/gon/chains"
+	"github.com/gjermundgaraba/gon/gorelayer"
 	"github.com/spf13/cobra"
 )
 
@@ -11,12 +12,18 @@ type Filter struct {
 	chains.ChainData
 }
 
-func selfRelayInteractive(cmd *cobra.Command, args []string) {
+func selfRelayInteractive(cmd *cobra.Command, args []string, appHomeDir string) {
 	var (
 		sourceChain      chains.Chain
 		destinationChain chains.Chain
 		txHash           string
 	)
+
+	key := chooseOrCreateKey(cmd, chains.IRISChain)
+	ethKey := getEthermintKeyName(key)
+	verbose, _ := cmd.Flags().GetBool(flagVerbose)
+	kr := getKeyring(cmd)
+	rly := gorelayer.InitRly(appHomeDir, key, ethKey, kr, verbose)
 
 	if len(args) > 3 {
 		sourceChainID := args[1]
@@ -52,7 +59,6 @@ func selfRelayInteractive(cmd *cobra.Command, args []string) {
 			panic(fmt.Errorf("destination chain %s not found", destinationChainID))
 		}
 	} else {
-		fmt.Println("This command requires the go relayer to have been set up according to the documentation see self-relay.md")
 		youSure := askForConfirmation("This is currently an experimental feature, are you sure you want to continue?", true)
 		if !youSure {
 			fmt.Println("Alight! See you later :*")
@@ -65,11 +71,7 @@ func selfRelayInteractive(cmd *cobra.Command, args []string) {
 		txHash = askForString("Transaction hash to relay", survey.WithValidator(survey.Required))
 	}
 
-	verbose, err := cmd.Flags().GetBool(flagVerbose)
-	if err != nil {
-		panic(err)
-	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txHash, true, verbose, true)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txHash, rly, true)
 
 	fmt.Println()
 	fmt.Println("Relay seemingly successful!")

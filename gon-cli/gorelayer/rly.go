@@ -108,7 +108,7 @@ func (rly *Rly) RelayPacket(ctx context.Context, connection chains.NFTConnection
 	var msgsSrc1, msgsDst1 []provider.RelayerMessage
 	eg.Go(func() error {
 		// Error ignored because it errors if there are no messages to relay, which might be fine! We deal with that later anyway
-		_ = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, src, dst, srch, dsth, &msgsSrc1, &msgsDst1,
+		err = relayer.AddMessagesForSequences(egCtx, []uint64{packetSequence}, src, dst, srch, dsth, &msgsSrc1, &msgsDst1,
 			srcChannel.ChannelId, srcChannel.PortId, srcChannel.Counterparty.ChannelId, srcChannel.Counterparty.PortId, srcChannel.Ordering)
 		rly.Log.Debug("Error from AddMessagesForSequences, msgsSrc1, msgsDst1", zap.String("src_chain_id", src.ChainID()), zap.String("dst_chain_id", dst.ChainID()), zap.Error(err))
 		return nil

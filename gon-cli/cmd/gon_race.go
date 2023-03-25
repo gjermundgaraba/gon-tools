@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/gjermundgaraba/gon/chains"
+	"github.com/gjermundgaraba/gon/gorelayer"
 	irisnfttypes "github.com/irisnet/irismod/modules/nft/types"
 	"github.com/spf13/cobra"
 	"strconv"
@@ -731,11 +732,16 @@ var raceFlows = map[string]raceFlow{
 	},
 }
 
-func raceInteractive(cmd *cobra.Command) {
+func raceInteractive(cmd *cobra.Command, appHomeDir string) {
 	iris := chains.IRISChain
 	key := chooseOrCreateKey(cmd, iris)
+	ethKey := getEthermintKeyName(key)
 	irisQueryClientCtx := getQueryClientContext(cmd, iris)
-	irisAddress := getAddressForChain(irisQueryClientCtx, iris, key)
+	irisAddress := getAddressForChain(cmd, iris, key)
+
+	verbose, _ := cmd.Flags().GetBool(flagVerbose)
+	kr := getKeyring(cmd)
+	rly := gorelayer.InitRly(appHomeDir, key, ethKey, kr, verbose)
 
 	selectedClass := getUsersNfts(cmd.Context(), getQueryClientContext(cmd, iris), iris, irisAddress)
 	if len(selectedClass.NFTs) == 0 {
@@ -771,7 +777,7 @@ func raceInteractive(cmd *cobra.Command) {
 	flow := raceFlows[nftData.Flow]
 	fmt.Println("Selected flow:", flow.FlowName)
 	fmt.Println("Raw flow:", flow.FlowRaw)
-	finalClass := runFlow(cmd, key, flow, selectedClass, selectedNFT)
+	finalClass := runFlow(cmd, rly, key, flow, selectedClass, selectedNFT)
 
 	setAddressPrefixes(iris.Bech32Prefix())
 	irisTxClientCtx := getClientTxContext(cmd, iris).
@@ -788,7 +794,7 @@ func raceInteractive(cmd *cobra.Command) {
 	waitForTX(cmd, iris, txResponse.TxHash, "Final transfer to last_owner", "Final transfer to last_owner")
 }
 
-func runFlow(cmd *cobra.Command, key string, flow raceFlow, selectedClass chains.NFTClass, selectedNFT chains.NFT) chains.NFTClass {
+func runFlow(cmd *cobra.Command, rly *gorelayer.Rly, key string, flow raceFlow, selectedClass chains.NFTClass, selectedNFT chains.NFT) chains.NFTClass {
 	currentClass := selectedClass
 	for _, conn := range flow.Path {
 		fmt.Println()
@@ -797,26 +803,26 @@ func runFlow(cmd *cobra.Command, key string, flow raceFlow, selectedClass chains
 		fmt.Printf("Current NFT trace: %s\n", currentClass.FullPathClassID)
 		sourceChain := chains.GetChainFromChainID(conn.ChannelA.ChainID)
 		destinationChain := chains.GetChainFromChainID(conn.ChannelB.ChainID)
-		currentClass = transferNFT(cmd, key, sourceChain, destinationChain, conn, currentClass, selectedNFT)
+		currentClass = transferNFT(cmd, rly, key, sourceChain, destinationChain, conn, currentClass, selectedNFT)
 		time.Sleep(500 * time.Millisecond)
 	}
 
 	return currentClass
 }
 
-func transferNFT(cmd *cobra.Command, keyName string, sourceChain, destinationChain chains.Chain, connection chains.NFTConnection, class chains.NFTClass, nft chains.NFT) chains.NFTClass {
+func transferNFT(cmd *cobra.Command, rly *gorelayer.Rly, keyName string, sourceChain, destinationChain chains.Chain, connection chains.NFTConnection, class chains.NFTClass, nft chains.NFT) chains.NFTClass {
 	if err := cmd.Flags().Set(flags.FlagFrom, getCorrectedKeyName(keyName, sourceChain)); err != nil {
 		panic(err)
 	}
 	setAddressPrefixes(sourceChain.Bech32Prefix())
-	clientCtx := getClientTxContext(cmd, sourceChain).
-		WithSkipConfirmation(true)
-	fromAddress := getAddressForChain(clientCtx, sourceChain, keyName)
-	toAddress := getAddressForChain(clientCtx, destinationChain, keyName)
+	fromAddress := getAddressForChain(cmd, sourceChain, keyName)
+	toAddress := getAddressForChain(cmd, destinationChain, keyName)
 
 	fmt.Println("From address:", fromAddress)
 	fmt.Println("To address:", toAddress)
 
+	clientCtx := getClientTxContext(cmd, sourceChain).
+		WithSkipConfirmation(true)
 	targetChainHeight, targetChainTimestamp := getCurrentChainStatus(cmd.Context(), getQueryClientContext(cmd, destinationChain))
 	timeoutHeight, timeoutTimestamp := sourceChain.GetIBCTimeouts(clientCtx, connection.ChannelA.Port, connection.ChannelA.Channel, targetChainHeight, targetChainTimestamp, false)
 	msg := sourceChain.CreateTransferNFTMsg(connection.ChannelA, class, nft, fromAddress, toAddress, timeoutHeight, timeoutTimestamp)
@@ -833,11 +839,7 @@ func transferNFT(cmd *cobra.Command, keyName string, sourceChain, destinationCha
 	expectedDestinationTrace, _ := calculateClassTrace(class.FullPathClassID, connection)
 	fmt.Println("Expected destination trace:", expectedDestinationTrace)
 
-	verbose, err := cmd.Flags().GetBool(flagVerbose)
-	if err != nil {
-		panic(err)
-	}
-	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, false, verbose, false)
+	waitAndPrintIBCTrail(cmd, sourceChain, destinationChain, txResponse.TxHash, rly, false)
 
 	return queryNftClassFromTrace(cmd, expectedDestinationTrace, destinationChain)
 }

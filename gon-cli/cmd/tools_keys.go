@@ -34,12 +34,8 @@ func chooseOrCreateKey(cmd *cobra.Command, chain chains.Chain) string {
 	if from, _ := cmd.Flags().GetString(flags.FlagFrom); from != "" {
 		return from
 	}
-	clientCtx, err := client.GetClientTxContext(cmd)
-	if err != nil {
-		panic(err)
-	}
 
-	kr := getKeyring(clientCtx.Codec)
+	kr := getKeyring(cmd)
 	records, err := kr.List()
 	if err != nil {
 		panic(err)
@@ -256,7 +252,16 @@ func chooseKeyName(records []*keyring.Record) string {
 	return string(chooseOne("Choose wallet", walletOptions))
 }
 
-func getKeyring(cdc codec.Codec) keyring.Keyring {
+func getKeyring(cmd *cobra.Command) keyring.Keyring {
+	clientCtx, err := client.GetClientTxContext(cmd)
+	if err != nil {
+		panic(err)
+	}
+
+	return getKeyringFromCodec(clientCtx.Codec)
+}
+
+func getKeyringFromCodec(cdc codec.Codec) keyring.Keyring {
 	kr, err := keyring.New("gon", "os", ".", os.Stdin, cdc, lensclient.LensKeyringAlgoOptions())
 	if err != nil {
 		panic(err)
@@ -277,8 +282,8 @@ func getCorrectedKeyName(originalKeyName string, chain chains.Chain) string {
 	return correctedKeyName
 }
 
-func getAddressForChain(clientCtx client.Context, chain chains.Chain, keyName string) string {
-	kr := getKeyring(clientCtx.Codec)
+func getAddressForChain(cmd *cobra.Command, chain chains.Chain, keyName string) string {
+	kr := getKeyring(cmd)
 	keyName = getCorrectedKeyName(keyName, chain)
 
 	record, err := kr.Key(keyName)

@@ -112,17 +112,17 @@ func NewRootCmd(appHomeDir string) *cobra.Command {
 			case mintNFTOption:
 				return mintNFTInteractive(cmd)
 			case transferNFTOption:
-				return transferNFTInteractive(cmd)
+				return transferNFTInteractive(cmd, appHomeDir)
 			case queryNFTSOption:
 				return queryNFTsInteractive(cmd)
 			case selfRelayOption:
-				selfRelayInteractive(cmd, args)
+				selfRelayInteractive(cmd, args, appHomeDir)
 				return nil
 			case toolsOption:
 				toolsInteractive(cmd, args)
 				return nil
 			case gonToolsOption:
-				gonToolsInteractive(cmd, args)
+				gonToolsInteractive(cmd, args, appHomeDir)
 				return nil
 			default:
 				panic(topLevelChoice + " not implemented option")
@@ -233,7 +233,7 @@ func persistentPreRun(cmd *cobra.Command, initClientCtx client.Context, cdc code
 	}
 
 	// Overwrite here, because config.ReadFromClientConfig sets it...
-	initClientCtx = initClientCtx.WithKeyring(getKeyring(cdc))
+	initClientCtx = initClientCtx.WithKeyring(getKeyringFromCodec(cdc))
 
 	if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 		return err

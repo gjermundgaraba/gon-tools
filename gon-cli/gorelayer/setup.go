@@ -1,10 +1,12 @@
 package gorelayer
 
 import (
+	_ "embed"
 	"fmt"
 	wasmdtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	omniflixnfttypes "github.com/OmniFlix/onft/types"
 	nfttransfertypes "github.com/bianjieai/nft-transfer/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	rlycmd "github.com/cosmos/relayer/v2/cmd"
 	"github.com/cosmos/relayer/v2/relayer"
 	"github.com/cosmos/relayer/v2/relayer/chains/cosmos"
@@ -15,19 +17,50 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"os"
-	"path"
-	"path/filepath"
+	"text/template"
 	"time"
 )
 
-func InitRly(log *zap.Logger) *Rly {
-	rly := &Rly{
-		Log:      log,
-		Viper:    viper.New(),
-		HomePath: filepath.Join(os.Getenv("HOME"), ".relayer"),
+//go:embed gorelayerconfig.yaml.tmpl
+var gorelayerconfigTemplate string
+
+type RlyConfigTemplate struct {
+	KeyName    string
+	EthKeyName string
+}
+
+// InitRly initializes the relayer config
+// TODO: Should ideally return a cleanup function to delete the temp file after use, but :shrug:
+func InitRly(homePath, keyName, ethKeyName string, kr keyring.Keyring, verbose bool) *Rly {
+	logger := zap.NewNop()
+	if verbose {
+		var err error
+		logger, err = zap.NewDevelopment()
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	cfgPath := path.Join(rly.HomePath, "config", "config.yaml")
+	rly := &Rly{
+		Log:      logger,
+		Viper:    viper.New(),
+		HomePath: homePath,
+	}
+
+	t, err := template.New("gorelayerconfig").Parse(gorelayerconfigTemplate)
+	if err != nil {
+		panic("Error parsing template: " + err.Error())
+	}
+
+	configFile, err := os.CreateTemp(os.TempDir(), "gorelayerconfig*.yaml")
+	if err := t.Execute(configFile, RlyConfigTemplate{
+		KeyName:    keyName,
+		EthKeyName: ethKeyName,
+	}); err != nil {
+		panic("Error executing template: " + err.Error())
+	}
+	cfgPath := configFile.Name()
+
 	rly.Viper.SetConfigFile(cfgPath)
 	if err := rly.Viper.ReadInConfig(); err != nil {
 		panic(err)
@@ -84,6 +117,8 @@ func InitRly(log *zap.Logger) *Rly {
 
 	for _, chain := range rly.Config.Chains {
 		cosmosChain := chain.ChainProvider.(*cosmos.CosmosProvider)
+		cosmosChain.Keybase = kr
+
 		nfttransfertypes.RegisterInterfaces(cosmosChain.Codec.InterfaceRegistry)
 		irisnfttypes.RegisterInterfaces(cosmosChain.Codec.InterfaceRegistry)
 		irisnfttypes.RegisterLegacyAminoCodec(cosmosChain.Codec.Amino)

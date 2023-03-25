@@ -283,7 +283,7 @@ func waitForTX(cmd *cobra.Command, chain chains.Chain, txHash string, shortTxLab
 		if err != nil {
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", txLabel, chain.Label(), try, maxTries)
-			time.Sleep(250 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			try++
 			continue
 		}
@@ -325,11 +325,11 @@ func waitForTXByEvents(cmd *cobra.Command, chain chains.Chain, events []string, 
 			}
 
 			fmt.Print("\033[G\033[K") // move the cursor left and clear the line
-			if try == 10 && longWaitMsg != "" {
+			if try == 15 && longWaitMsg != "" {
 				fmt.Printf("⏳ %s\n", longWaitMsg)
 			}
 			fmt.Printf("⬜ Waiting for %s on %s - attempt %d/%d", shortTxLabel, chain.Label(), try, maxTries)
-			time.Sleep(250 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			try++
 			continue
 		default:

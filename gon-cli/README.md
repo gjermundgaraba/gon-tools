@@ -13,6 +13,7 @@ The GON cli is a CLI for Game of NFTs. It can create classes/collections/denoms,
 | OmniFlix | ❌            | ❌         | ✅                        | ✅          |
 
 Extra helper tools and features:
+- ✅ Self relaying ([docs](./self-relay.md))
 - ✅ IBC Transaction lookup
 - ✅ Key management
 - ✅ Multiline editor for NFT metadata

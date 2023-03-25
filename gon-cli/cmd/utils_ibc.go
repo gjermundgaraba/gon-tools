@@ -7,36 +7,23 @@ import (
 	"github.com/gjermundgaraba/gon/chains"
 	"github.com/gjermundgaraba/gon/gorelayer"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
 
-func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, selfRelay bool, verbose bool, waitForAck bool) {
+func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinationChain chains.Chain, txHash string, rly *gorelayer.Rly, waitForAck bool) {
 	txResp := waitForTX(cmd, sourceChain, txHash, "Initial IBC packet", "Initial IBC packet")
 	packetSequence := findPacketSequence(txResp)
 	connection := findConnection(txResp)
 	connection.ChannelA.ChainID = sourceChain.ChainID()
 	connection.ChannelB.ChainID = destinationChain.ChainID()
 
-	if selfRelay {
-		fmt.Println("Self relaying... (Note: this requires configuration according to the documentation in self-relay.md)")
+	if rly != nil {
+		fmt.Println("Self relaying...")
 
 		relayed := false
 		maxTries := 25
 		for i := 0; i < maxTries; i++ {
-			logger := zap.NewNop()
-			if verbose {
-				var err error
-				logger, err = zap.NewDevelopment()
-				if err != nil {
-					panic(err)
-				}
-			}
-
-			defer logger.Sync() // flushes buffer, if any
-			rly := gorelayer.InitRly(logger)
-
 			packetSequenceAsUint64, err := strconv.ParseUint(packetSequence, 10, 64)
 			if err != nil {
 				panic(err)
@@ -46,7 +33,7 @@ func waitAndPrintIBCTrail(cmd *cobra.Command, sourceChain chains.Chain, destinat
 				fmt.Println("Transfer seemingly self relayed (or successfully relayed by someone else, who knows!)")
 				break
 			} else {
-				time.Sleep(250 * time.Millisecond)
+				time.Sleep(500 * time.Millisecond)
 			}
 		}
 

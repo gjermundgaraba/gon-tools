@@ -18,8 +18,7 @@ func createNFTClassInteractive(cmd *cobra.Command) error {
 		panic(err)
 	}
 
-	clientCtx := getClientTxContext(cmd, chain)
-	fromAddress := getAddressForChain(clientCtx, chain, key)
+	fromAddress := getAddressForChain(cmd, chain, key)
 
 	var classID string
 	if err := survey.AskOne(&survey.Input{Message: "Class ID"}, &classID, survey.WithValidator(idValidator)); err != nil {
@@ -74,5 +73,7 @@ func createNFTClassInteractive(cmd *cobra.Command) error {
 	}
 
 	msg := chain.CreateIssueCreditClassMsg(classID, name, "", fromAddress, symbol, mintRestricted, updateRestricted, description, uri, uriHash, data)
+
+	clientCtx := getClientTxContext(cmd, chain)
 	return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 }

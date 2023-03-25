@@ -1,0 +1,352 @@
+global:
+  api-listen-addr: :5183
+  timeout: 10s
+  memo: gon
+  light-cache-size: 20
+chains:
+  elgafar-1:
+    type: cosmos
+    value:
+      key: {{ .KeyName }}
+      chain-id: elgafar-1
+      rpc-addr: https://rpc.elgafar-1.stargaze-apis.com:443
+      account-prefix: stars
+      keyring-backend: test
+      gas-adjustment: 1.5
+      gas-prices: 0.05ustars
+      min-gas-amount: 0
+      debug: true
+      timeout: 10s
+      output-format: json
+      sign-mode: direct
+      extra-codecs: []
+  gon-flixnet-1:
+    type: cosmos
+    value:
+      key: {{ .KeyName }}
+      chain-id: gon-flixnet-1
+      rpc-addr: http://65.21.93.56:26657
+      account-prefix: omniflix
+      keyring-backend: test
+      gas-adjustment: 1.2
+      gas-prices: 0.01uflix
+      min-gas-amount: 0
+      debug: true
+      timeout: 10s
+      output-format: json
+      sign-mode: direct
+      extra-codecs: []
+  gon-irishub-1:
+    type: cosmos
+    value:
+      key: {{ .KeyName }}
+      chain-id: gon-irishub-1
+      rpc-addr: http://34.80.93.133:26657
+      account-prefix: iaa
+      keyring-backend: test
+      gas-adjustment: 1.2
+      gas-prices: 0.01uiris
+      min-gas-amount: 0
+      debug: true
+      timeout: 10s
+      output-format: json
+      sign-mode: direct
+      extra-codecs: []
+  uni-6:
+    type: cosmos
+    value:
+      key: {{ .KeyName }}
+      chain-id: uni-6
+      rpc-addr: https://rpc.uni.juno.deuslabs.fi:443
+      account-prefix: juno
+      keyring-backend: test
+      gas-adjustment: 1.5
+      gas-prices: 0.05ujunox
+      min-gas-amount: 0
+      debug: true
+      timeout: 10s
+      output-format: json
+      sign-mode: direct
+      extra-codecs: []
+  uptick_7000-2:
+    type: cosmos
+    value:
+      key: {{ .EthKeyName }}
+      chain-id: uptick_7000-2
+      rpc-addr: http://52.220.252.160:26657
+      account-prefix: uptick
+      keyring-backend: test
+      gas-adjustment: 1.2
+      gas-prices: 0.01auptick
+      min-gas-amount: 0
+      debug: true
+      timeout: 10s
+      output-format: json
+      sign-mode: direct
+      extra-codecs:
+        - ethermint
+paths:
+  gon-flixnet-1_channel-44-elgafar-1_channel-209:
+    src:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-64
+      connection-id: connection-59
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-186
+      connection-id: connection-175
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-flixnet-1_channel-45-elgafar-1_channel-210:
+    src:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-65
+      connection-id: connection-60
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-187
+      connection-id: connection-176
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-flixnet-1_channel-46-uni-6_channel-91:
+    src:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-66
+      connection-id: connection-61
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-86
+      connection-id: connection-94
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-flixnet-1_channel-47-uni-6_channel-92:
+    src:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-68
+      connection-id: connection-62
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-87
+      connection-id: connection-95
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-0-gon-flixnet-1_channel-24:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-0
+      connection-id: connection-0
+    dst:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-40
+      connection-id: connection-37
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-1-gon-flixnet-1_channel-25:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-1
+      connection-id: connection-1
+    dst:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-41
+      connection-id: connection-38
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-17-uptick_7000-2_channel-3:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-17
+      connection-id: connection-17
+    dst:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-26
+      connection-id: connection-25
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-19-uptick_7000-2_channel-4:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-18
+      connection-id: connection-19
+    dst:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-27
+      connection-id: connection-26
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-22-elgafar-1_channel-207:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-20
+      connection-id: connection-21
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-184
+      connection-id: connection-173
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-23-elgafar-1_channel-208:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-21
+      connection-id: connection-22
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-185
+      connection-id: connection-174
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-24-uni-6_channel-89:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-22
+      connection-id: connection-23
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-84
+      connection-id: connection-92
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  gon-irishub-1_channel-25-uni-6_channel-90:
+    src:
+      chain-id: gon-irishub-1
+      client-id: 07-tendermint-23
+      connection-id: connection-24
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-85
+      connection-id: connection-93
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uni-6_channel-93-elgafar-1_channel-211:
+    src:
+      chain-id: uni-6
+      client-id: 07-tendermint-88
+      connection-id: connection-96
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-188
+      connection-id: connection-177
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uni-6_channel-94-elgafar-1_channel-213:
+    src:
+      chain-id: uni-6
+      client-id: 07-tendermint-89
+      connection-id: connection-97
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-189
+      connection-id: connection-179
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uni-6_channel-120-elgafar-1_channel-230:
+    src:
+      chain-id: uni-6
+      client-id: 07-tendermint-115
+      connection-id: connection-124
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-211
+      connection-id: connection-200
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uni-6_channel-122-elgafar-1_channel-234:
+    src:
+      chain-id: uni-6
+      client-id: 07-tendermint-117
+      connection-id: connection-126
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-213
+      connection-id: connection-204
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-5-gon-flixnet-1_channel-41:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-28
+      connection-id: connection-27
+    dst:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-60
+      connection-id: connection-56
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-6-elgafar-1_channel-203:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-29
+      connection-id: connection-28
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-179
+      connection-id: connection-169
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-7-uni-6_channel-86:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-30
+      connection-id: connection-29
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-81
+      connection-id: connection-89
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-9-gon-flixnet-1_channel-42:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-31
+      connection-id: connection-30
+    dst:
+      chain-id: gon-flixnet-1
+      client-id: 07-tendermint-61
+      connection-id: connection-57
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-12-elgafar-1_channel-206:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-35
+      connection-id: connection-34
+    dst:
+      chain-id: elgafar-1
+      client-id: 07-tendermint-183
+      connection-id: connection-172
+    src-channel-filter:
+      rule: ""
+      channel-list: []
+  uptick_7000-2_channel-13-uni-6_channel-88:
+    src:
+      chain-id: uptick_7000-2
+      client-id: 07-tendermint-36
+      connection-id: connection-35
+    dst:
+      chain-id: uni-6
+      client-id: 07-tendermint-83
+      connection-id: connection-91
+    src-channel-filter:
+      rule: ""
+      channel-list: []

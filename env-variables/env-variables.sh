@@ -21,7 +21,7 @@ STARGAZE_Q_DEFAULT=(--node $STARGAZE_RPC)
 
 JUNO_CHAIN_ID="uni-6"
 JUNO_DENOM="ujunox"
-JUNO_RPC="https://rpc.uni.junonetwork.io:443"
+JUNO_RPC="https://rpc.uni.juno.deuslabs.fi:443"
 JUNO_GRPC="http://juno-testnet-grpc.polkachu.com:12690"
 JUNO_WS="wss://rpc.uni.junonetwork.io/websocket"
 JUNO_TX_DEFAULT=(--gas auto --gas-adjustment 1.5 --gas-prices 0.025$JUNO_DENOM --from $WALLET_NAME --node $JUNO_RPC --chain-id $JUNO_CHAIN_ID)

@@ -13,7 +13,7 @@ const (
 	quizCommand              = "quiz"
 )
 
-func gonToolsInteractive(cmd *cobra.Command, args []string) {
+func gonToolsInteractive(cmd *cobra.Command, args []string, appHomeDir string) {
 	toolsOptions := []OptionString{
 		validateEvidenceFileOption,
 		raceOption,
@@ -40,7 +40,7 @@ func gonToolsInteractive(cmd *cobra.Command, args []string) {
 	case validateEvidenceFileOption:
 		validateEvidenceFileInteractive()
 	case raceOption:
-		raceInteractive(cmd)
+		raceInteractive(cmd, appHomeDir)
 	case quizOption:
 		gonQuizInteractive()
 	default:
