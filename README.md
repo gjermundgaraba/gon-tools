@@ -1,5 +1,10 @@
 # gon-tools
 
+This repo is getting archived:
+
+The development of the gon-cli has been moved to https://github.com/gjermundgaraba/nft-cli in the form of a less
+testnet specific version that focuses on interchain NFT use cases (still transfering and self-relaying NFT transfers).
+
 Assortment of tools for Game of NFTs
 
 ## env-variables

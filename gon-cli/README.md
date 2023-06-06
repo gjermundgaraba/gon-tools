@@ -1,5 +1,10 @@
 # gon-cli
 
+This repo is getting archived:
+
+The development of the gon-cli has been moved to https://github.com/gjermundgaraba/nft-cli in the form of a less
+testnet specific version that focuses on interchain NFT use cases (still transfering and self-relaying NFT transfers).
+
 The GON cli is a CLI for Game of NFTs. It can create classes/collections/denoms, mint NFTs, transfer NFTs, and query NFTs from a single CLI.
 
 ## Feature matrix
